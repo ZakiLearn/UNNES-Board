@@ -19,68 +19,38 @@ export default function UnofficialOrgs({ onSelectBoard }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h3 style={{ textTransform: 'uppercase', fontSize: '1.3rem' }}>
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+        <h3 className="uppercase text-base md:text-lg">
           🤝 Komunitas Hobi & Tongkrongan (Unofficial Groups)
         </h3>
-        <Link href="/communities/create" className="neo-btn small blue" style={{ margin: '0' }}>
+        <Link href="/communities/create" className="neo-btn small blue !m-0">
           + Buat Baru
         </Link>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-        gap: '20px'
-      }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {unofficialCommunities.map(group => {
           const isJoined = joinedList[group.id];
           return (
-            <div key={group.id} className="neo-card interactive" style={{
-              margin: 0,
-              padding: '16px',
-              backgroundColor: 'var(--bg-white)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }} onClick={() => onSelectBoard(group.name)}>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
-                <div style={{
-                  fontSize: '1.6rem',
-                  background: 'var(--accent-mint)',
-                  border: 'var(--border-stroke)',
-                  borderRadius: 'var(--border-radius-sm)',
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '2px 2px 0 0 var(--color-black)'
-                }}>{group.logo}</div>
+            <div key={group.id} className="neo-card interactive !m-0 !p-4 bg-white flex flex-col justify-between" onClick={() => onSelectBoard(group.name)}>
+              <div className="flex gap-3 items-center mb-3">
+                <div className="text-2xl bg-mint border-2 border-neo-black rounded-sm w-10 h-10 flex items-center justify-center shadow-[2px_2px_0_0_#1A1A1A] flex-shrink-0">{group.logo}</div>
                 <div>
-                  <h4 style={{ fontSize: '0.95rem', marginBottom: '2px' }}>{group.name}</h4>
-                  <span className="neo-badge" style={{ backgroundColor: 'var(--bg-cream)', fontSize: '0.65rem', padding: '2px 8px' }}>
+                  <h4 className="text-sm font-extrabold text-neo-black leading-tight mb-1">{group.name}</h4>
+                  <span className="neo-badge !bg-cream !px-2 !py-0.5 !text-[10px]">
                     {group.category}
                   </span>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderTop: '2px dashed var(--color-black)',
-                paddingTop: '10px',
-                marginTop: '10px'
-              }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(26,26,26,0.6)' }}>
+              <div className="flex justify-between items-center border-t-2 border-dashed border-neo-black pt-3 mt-3">
+                <span className="text-xs font-bold text-neo-black/60">
                   👤 {group.members + (isJoined ? 1 : 0)} anggota
                 </span>
                 
                 <button 
                   onClick={(e) => toggleJoin(group.id, e)}
-                  className={`neo-btn small ${isJoined ? 'mint' : 'sky'}`}
-                  style={{ padding: '4px 8px', fontSize: '0.75rem', margin: '0' }}
+                  className={`neo-btn small !m-0 !py-1 !px-2.5 text-xs ${isJoined ? 'mint' : 'sky'}`}
                 >
                   {isJoined ? '✓ Joined' : 'Join'}
                 </button>

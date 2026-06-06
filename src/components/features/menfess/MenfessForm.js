@@ -48,13 +48,15 @@ export default function MenfessForm({ isOpen, onClose, onSubmit }) {
   };
 
   return (
-    <div className="modal-overlay active">
-      <div className="modal-content neo-card">
-        <div className="modal-header">
-          <h3>Kirim Menfess Baru 📨</h3>
-          <button className="modal-close" onClick={onClose}>&times;</button>
+    <div className="fixed inset-0 bg-neo-black/60 backdrop-blur-[3px] z-[200] flex items-center justify-center p-4">
+      <div className="bg-cream border-2 border-neo-black rounded-lg shadow-neo w-full max-w-[500px] flex flex-col overflow-hidden !mb-0">
+        <div className="flex justify-between items-center border-b-2 border-neo-black p-4 bg-white">
+          <h3 className="text-lg md:text-xl m-0">Kirim Menfess Baru 📨</h3>
+          <button className="text-3xl leading-none font-bold hover:text-orange transition-colors cursor-pointer" onClick={onClose}>
+            &times;
+          </button>
         </div>
-        <div className="modal-body">
+        <div className="p-5 overflow-y-auto max-h-[calc(100vh-140px)]">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label" htmlFor="form-sender">Dari (Sender)</label>
@@ -111,7 +113,7 @@ export default function MenfessForm({ isOpen, onClose, onSubmit }) {
               ></textarea>
             </div>
             
-            <button type="submit" className="neo-btn blue" style={{ width: '100%', justifyContent: 'center', marginTop: '12px' }}>
+            <button type="submit" className="neo-btn blue w-full justify-center mt-3">
               Kirim Menfess 🚀
             </button>
           </form>

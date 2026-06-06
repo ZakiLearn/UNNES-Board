@@ -69,54 +69,66 @@ export default function MarketplacePage() {
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-      
-      {/* Header section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="grid grid-cols-1 lg:grid-cols-[2.2fr_0.8fr] gap-4 md:gap-5">
+      {/* Left Column */}
+      <div className="flex flex-col gap-4">
         <div>
-          <h2 style={{ fontSize: '2rem', textTransform: 'uppercase', marginBottom: '8px' }}>🛍️ Sekaran Marketplace</h2>
-          <p style={{ color: 'rgba(26,26,26,0.7)', fontWeight: 600 }}>Pasar loak digital mahasiswa UNNES. COD gampang di sekitar Sekaran.</p>
+          <h2 className="text-xl md:text-2xl uppercase mb-1">🛍️ Sekaran Marketplace</h2>
+          <p className="text-neo-black/70 font-semibold text-xs md:text-sm">Pasar loak digital mahasiswa UNNES. COD gampang di sekitar Sekaran.</p>
         </div>
-        
-        <button className="neo-btn blue" onClick={() => setIsModalOpen(true)} style={{ margin: 0 }}>
-          Jual Barang ➕
-        </button>
+
+        {/* Search Bar */}
+        <div className="neo-card !p-3.5 !mb-0">
+          <input
+            type="text"
+            className="form-control !p-2.5 !m-0 !text-xs !shadow-neo-sm"
+            placeholder="Cari barang bekas kosan (sepeda, rice cooker, jas lab, hoodie)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* Products Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="neo-card text-center py-8 px-4">
+            <span className="text-4xl block mb-2">📦</span>
+            <h3 className="text-sm font-extrabold">Barang tidak ditemukan</h3>
+            <p className="text-neo-black/60 mt-1 text-xs">Coba cari dengan kata kunci lain atau jadilah yang pertama menjual barang ini!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredProducts.map(product => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                onContactSeller={handleContactSeller} 
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Search Bar */}
-      <div className="neo-card" style={{ padding: '16px', marginBottom: 0 }}>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Cari barang bekas kosan (sepeda, rice cooker, jas lab, hoodie)..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ padding: '12px 16px', margin: 0 }}
-        />
-      </div>
+      {/* Right Column */}
+      <div className="hidden lg:flex flex-col gap-4">
+        {/* Sell Button Widget */}
+        <div className="neo-card !p-4 !mb-0 bg-blue text-white">
+          <h3 className="text-base text-white mb-2">Punya barang tak terpakai? 📦</h3>
+          <p className="text-xs text-white/90 font-semibold mb-3">Jual barang kosan Anda ke sesama mahasiswa UNNES dengan cepat.</p>
+          <button className="neo-btn small orange w-full justify-center !m-0" onClick={() => setIsModalOpen(true)}>
+            Jual Barang ➕
+          </button>
+        </div>
 
-      {/* Products Grid */}
-      {filteredProducts.length === 0 ? (
-        <div className="neo-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-          <span style={{ fontSize: '3rem' }}>📦</span>
-          <h3 style={{ marginTop: '12px' }}>Barang tidak ditemukan</h3>
-          <p style={{ color: 'rgba(26,26,26,0.6)', marginTop: '8px' }}>Coba cari dengan kata kunci lain atau jadilah yang pertama menjual barang ini!</p>
+        {/* COD Safety Widget */}
+        <div className="neo-card !p-4 !mb-0">
+          <h3 className="text-sm mb-2.5">🛡️ Panduan COD Aman</h3>
+          <ul className="list-disc pl-4 text-[11px] font-semibold text-neo-black/80 space-y-1.5">
+            <li>Lakukan COD di tempat ramai/terbuka (seperti perpustakaan, teras GSG, atau depan rektorat).</li>
+            <li>Cek kondisi barang secara teliti sebelum menyerahkan uang.</li>
+            <li>Gunakan pembayaran nontunai (QRIS/Transfer) jika nominalnya besar.</li>
+          </ul>
         </div>
-      ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '24px'
-        }}>
-          {filteredProducts.map(product => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              onContactSeller={handleContactSeller} 
-            />
-          ))}
-        </div>
-      )}
+      </div>
 
       <AddProductForm 
         isOpen={isModalOpen}

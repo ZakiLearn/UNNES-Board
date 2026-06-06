@@ -65,109 +65,102 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-      {/* Profile Info Card */}
-      <div className="neo-card" style={{
-        backgroundColor: 'var(--accent-sky)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px',
-        padding: '32px',
-        flexWrap: 'wrap',
-        marginBottom: 0
-      }}>
-        <div style={{
-          fontSize: '3rem',
-          background: 'var(--bg-white)',
-          border: 'var(--border-stroke)',
-          borderRadius: '50%',
-          width: '90px',
-          height: '90px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '4px 4px 0 0 var(--color-black)'
-        }}>
-          {user.avatar}
+    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 md:gap-5">
+      {/* Left Column */}
+      <div className="flex flex-col gap-4">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="neo-card text-center !m-0 !p-3 bg-white">
+            <span className="text-xl md:text-2xl font-black text-blue block mb-0.5">
+              {myMenfess.length}
+            </span>
+            <span className="text-[9px] font-black text-neo-black/60">
+              MENFESS TERKIRIM
+            </span>
+          </div>
+          <div className="neo-card text-center !m-0 !p-3 bg-white">
+            <span className="text-xl md:text-2xl font-black text-blue block mb-0.5">
+              {myMenfess.reduce((sum, item) => sum + Object.values(item.reactions).reduce((a, b) => a + b, 0), 0)}
+            </span>
+            <span className="text-[9px] font-black text-neo-black/60">
+              REAKSI DITERIMA
+            </span>
+          </div>
+          <div className="neo-card text-center !m-0 !p-3 bg-white">
+            <span className="text-xl md:text-2xl font-black text-blue block mb-0.5">
+              Aktif
+            </span>
+            <span className="text-[9px] font-black text-neo-black/60">
+              STATUS AKUN
+            </span>
+          </div>
         </div>
+
+        {/* My Posts Feed */}
         <div>
-          <h2 style={{ fontSize: '2rem', textTransform: 'uppercase', marginBottom: '4px' }}>{user.name}</h2>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '8px' }}>
-            <span className="neo-badge" style={{ backgroundColor: 'var(--accent-orange)' }}>{user.role}</span>
-            <span className="neo-badge" style={{ backgroundColor: 'var(--bg-white)' }}>NIM: {user.nim}</span>
-          </div>
-          <div style={{ fontWeight: 700, color: 'rgba(26,26,26,0.8)' }}>📧 {user.email}</div>
+          <h3 className="uppercase mb-3 text-sm md:text-base">
+            📝 Riwayat Menfess Saya
+          </h3>
+          
+          {myMenfess.length === 0 ? (
+            <div className="neo-card text-center py-8 px-4 bg-white">
+              <span className="text-4xl block mb-2">📭</span>
+              <h4 className="text-sm font-extrabold">Belum ada kiriman</h4>
+              <p className="text-neo-black/60 mt-1 text-xs">
+                Kirim menfess pertamamu lewat Halaman Utama!
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {myMenfess.map(post => (
+                <ThreadCard
+                  key={post.id}
+                  post={post}
+                  userReactions={userReactions}
+                  onReaction={handleReaction}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '20px'
-      }} className="profile-stats-grid">
-        <div className="neo-card" style={{ textAlign: 'center', margin: 0, padding: '16px' }}>
-          <span style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--accent-blue)', display: 'block' }}>
-            {myMenfess.length}
-          </span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'rgba(26,26,26,0.6)' }}>
-            MENFESS TERKIRIM
-          </span>
-        </div>
-        <div className="neo-card" style={{ textAlign: 'center', margin: 0, padding: '16px' }}>
-          <span style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--accent-blue)', display: 'block' }}>
-            {myMenfess.reduce((sum, item) => sum + Object.values(item.reactions).reduce((a, b) => a + b, 0), 0)}
-          </span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'rgba(26,26,26,0.6)' }}>
-            REAKSI DITERIMA
-          </span>
-        </div>
-        <div className="neo-card" style={{ textAlign: 'center', margin: 0, padding: '16px' }}>
-          <span style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--accent-blue)', display: 'block' }}>
-            Aktif
-          </span>
-          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'rgba(26,26,26,0.6)' }}>
-            STATUS AKUN
-          </span>
+      {/* Right Column */}
+      <div className="hidden lg:flex flex-col gap-4">
+        {/* Profile Card (Reddit style About card) */}
+        <div className="neo-card !p-4 !mb-0 bg-sky">
+          <div className="flex items-center gap-3 mb-3 pb-3 border-b-2 border-neo-black">
+            <div className="text-3xl bg-white border-2 border-neo-black rounded-full w-14 h-14 flex items-center justify-center shadow-neo">
+              {user.avatar}
+            </div>
+            <div>
+              <h2 className="text-base font-black uppercase m-0 leading-tight">{user.name}</h2>
+              <span className="neo-badge !bg-orange !text-[9px] !py-0.5 !px-1.5 mt-1">{user.role}</span>
+            </div>
+          </div>
+
+          <div className="space-y-2 text-xs font-semibold text-neo-black/80">
+            <div>
+              <span className="text-[10px] text-neo-black/50 block font-bold">NIM MAHASISWA</span>
+              <span>{user.nim}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-neo-black/50 block font-bold">EMAIL AKUN</span>
+              <span className="truncate block">{user.email}</span>
+            </div>
+            <div>
+              <span className="text-[10px] text-neo-black/50 block font-bold">TERDAFTAR SEJAK</span>
+              <span>Semester Gasal 2024</span>
+            </div>
+            <div className="pt-2">
+              <div className="flex items-center gap-1.5 bg-white border-2 border-neo-black p-2 rounded-sm text-[10px] text-neo-black">
+                <span>🛡️</span>
+                <span>Mahasiswa UNNES Terverifikasi</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* My Posts Feed */}
-      <div>
-        <h3 style={{ textTransform: 'uppercase', marginBottom: '16px', fontSize: '1.3rem' }}>
-          📝 Riwayat Menfess Saya
-        </h3>
-        
-        {myMenfess.length === 0 ? (
-          <div className="neo-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <span style={{ fontSize: '2.5rem' }}>📭</span>
-            <h4 style={{ marginTop: '12px' }}>Belum ada kiriman</h4>
-            <p style={{ color: 'rgba(26,26,26,0.6)', marginTop: '8px', fontSize: '0.9rem', fontWeight: 600 }}>
-              Kirim menfess pertamamu lewat Halaman Utama!
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {myMenfess.map(post => (
-              <ThreadCard
-                key={post.id}
-                post={post}
-                userReactions={userReactions}
-                onReaction={handleReaction}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <style jsx>{`
-        @media (max-width: 600px) {
-          .profile-stats-grid {
-            grid-template-columns: 1fr !important;
-            gap: 12px !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import UpcomingEventBanner from '@/components/features/feed/UpcomingEventBanner';
 import ThreadList from '@/components/features/feed/ThreadList';
 import PollWidget from '@/components/features/poll/PollWidget';
 import MenfessForm from '@/components/features/menfess/MenfessForm';
@@ -150,16 +149,15 @@ export default function FeedPage() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '30px' }} className="feed-layout-grid">
+    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 md:gap-5">
       
       {/* Center Feed Column */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <UpcomingEventBanner />
+      <div className="flex flex-col gap-4">
         
         {/* Quick Post card */}
-        <div className="neo-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 }}>
-          <h3 style={{ fontSize: '1.1rem', margin: 0 }}>Punya uneg-uneg hari ini? 📨</h3>
-          <button className="neo-btn blue" onClick={() => setIsModalOpen(true)} style={{ margin: 0 }}>
+        <div className="neo-card !p-4 flex justify-between items-center !mb-0 flex-wrap gap-4">
+          <h3 className="text-sm md:text-base !m-0">Punya uneg-uneg hari ini? 📨</h3>
+          <button className="neo-btn blue !m-0" onClick={() => setIsModalOpen(true)}>
             Kirim Menfess
           </button>
         </div>
@@ -172,7 +170,7 @@ export default function FeedPage() {
       </div>
 
       {/* Right Column (Widgets) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }} className="feed-right-column">
+      <div className="hidden lg:flex flex-col gap-4">
         <PollWidget 
           pollData={pollData}
           votedOptionId={votedPollId}
@@ -194,17 +192,6 @@ export default function FeedPage() {
           </div>
         ))}
       </div>
-
-      <style jsx>{`
-        @media (max-width: 1024px) {
-          .feed-layout-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .feed-right-column {
-            display: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

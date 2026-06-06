@@ -30,44 +30,64 @@ export default function ExplorePage() {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-      <div>
-        <h2 style={{ fontSize: '2rem', textTransform: 'uppercase', marginBottom: '8px' }}>📡 Explore Communities</h2>
-        <p style={{ color: 'rgba(26,26,26,0.7)', fontWeight: 600 }}>Temukan papan pengumuman resmi dan obrolan komunitas mahasiswa UNNES.</p>
+    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 md:gap-5">
+      {/* Left Column */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-xl md:text-2xl uppercase mb-1">📡 Explore Communities</h2>
+          <p className="text-neo-black/70 font-semibold text-xs md:text-sm">Temukan papan pengumuman resmi dan obrolan komunitas mahasiswa UNNES.</p>
+        </div>
+
+        <OfficialOrgs onSelectBoard={handleSelectBoard} />
+        <UnofficialOrgs onSelectBoard={handleSelectBoard} />
       </div>
 
-      <OfficialOrgs onSelectBoard={handleSelectBoard} />
-      <UnofficialOrgs onSelectBoard={handleSelectBoard} />
+      {/* Right Column */}
+      <div className="hidden lg:flex flex-col gap-4">
+        {/* Guidelines Widget */}
+        <div className="neo-card !p-4 !mb-0">
+          <h3 className="text-base mb-3">📋 Ketentuan Papan</h3>
+          <ol className="list-decimal pl-4 text-xs font-semibold text-neo-black/80 space-y-2">
+            <li>Gunakan bahasa sopan dan saling menghargai.</li>
+            <li>Dilarang spamming, beriklan di luar marketplace, atau menyebar hoax.</li>
+            <li>Papan diskusi resmi dikelola oleh organisasi penanggung jawab.</li>
+          </ol>
+        </div>
+
+        {/* Action Widget */}
+        <div className="neo-card !p-4 !mb-0 bg-sky">
+          <h3 className="text-base mb-2">Ingin buat grup baru? 📢</h3>
+          <p className="text-xs font-semibold mb-3">Buat papan obrolan komunitas untuk UKM, paguyuban daerah, atau kelompok belajar Anda!</p>
+          <a href="/communities/create" className="neo-btn small blue w-full justify-center !m-0">
+            Buat Komunitas ➕
+          </a>
+        </div>
+      </div>
 
       {/* Interactive Board Modal */}
       {selectedBoard && (
-        <div className="modal-overlay active">
-          <div className="modal-content neo-card" style={{ maxWidth: '500px' }}>
-            <div className="modal-header">
-              <h3>📌 Papan {selectedBoard}</h3>
-              <button className="modal-close" onClick={() => setSelectedBoard(null)}>&times;</button>
+        <div className="fixed inset-0 bg-neo-black/60 backdrop-blur-[3px] z-[200] flex items-center justify-center p-4">
+          <div className="bg-cream border-2 border-neo-black rounded-lg shadow-neo w-full max-w-[500px] flex flex-col overflow-hidden !mb-0">
+            <div className="flex justify-between items-center border-b-2 border-neo-black p-4 bg-white">
+              <h3 className="text-lg md:text-xl m-0">📌 Papan {selectedBoard}</h3>
+              <button className="text-3xl leading-none font-bold hover:text-orange transition-colors cursor-pointer" onClick={() => setSelectedBoard(null)}>
+                &times;
+              </button>
             </div>
-            <div className="modal-body">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+            <div className="p-5 overflow-y-auto max-h-[calc(100vh-140px)]">
+              <div className="flex flex-col gap-3 mb-5">
                 {activeMessages.map(msg => (
-                  <div key={msg.id} style={{
-                    background: 'var(--bg-white)',
-                    border: 'var(--border-stroke)',
-                    borderRadius: 'var(--border-radius-sm)',
-                    padding: '12px',
-                    boxShadow: '2px 2px 0 0 var(--color-black)'
-                  }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--accent-blue)', marginBottom: '4px' }}>
+                  <div key={msg.id} className="bg-white border-2 border-neo-black rounded-sm p-3 shadow-[2px_2px_0px_0px_#1A1A1A]">
+                    <div className="font-extrabold text-xs text-blue mb-1">
                       @{msg.sender}
                     </div>
-                    <p style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{msg.text}</p>
+                    <p className="text-sm font-semibold m-0">{msg.text}</p>
                   </div>
                 ))}
               </div>
               <button 
                 onClick={() => setSelectedBoard(null)}
-                className="neo-btn blue" 
-                style={{ width: '100%', justifyContent: 'center', margin: 0 }}
+                className="neo-btn blue w-full justify-center !m-0"
               >
                 Tutup Papan 🚪
               </button>

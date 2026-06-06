@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  nama         String        @db.VarChar(100)
+  email        String        @unique @db.VarChar(255)
+  passwordHash String        @map("password_hash") @db.VarChar(255)
+  role         String        @db.VarChar(20)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
+  reservations Reservation[]
+
+  @@map("users")
+}
+
+model Category {
+  id        Int         @id @default(autoincrement())
+  nama      String      @unique @db.VarChar(100)
+  tipe      String      @db.VarChar(20)
+  deskripsi String?     @db.Text
+  studios   Studio[]
+  equipment Equipment[]
+
+  @@map("categories")
+}
+
+model Studio {
+  id           Int           @id @default(autoincrement())
+  nama         String        @db.VarChar(100)
+  categoryId   Int           @map("category_id")
+  hargaPerJam  Decimal       @map("harga_per_jam") @db.Decimal(12, 2)
+  status       String        @default("available") @db.VarChar(20)
+  deskripsi    String?       @db.Text
+  category     Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  reservations Reservation[]
+
+  @@map("studios")
+}
+
+model Equipment {
+  id                 Int                 @id @default(autoincrement())
+  nama               String              @db.VarChar(100)
+  categoryId         Int                 @map("category_id")
+  hargaSewaPerUnit   Decimal             @map("harga_sewa_per_unit") @db.Decimal(12, 2)
+  stokTotal          Int                 @map("stok_total")
+  status             String              @default("active") @db.VarChar(20)
+  category           Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  reservationDetails ReservationDetail[]
+
+  @@map("equipment")
+}
+
+model Reservation {
+  id                 Int                 @id @default(autoincrement())
+  userId             Int                 @map("user_id")
+  studioId           Int                 @map("studio_id")
+  waktuMulai         DateTime            @map("waktu_mulai")
+  waktuSelesai       DateTime            @map("waktu_selesai")
+  totalHarga         Decimal             @map("total_harga") @db.Decimal(12, 2)
+  status             String              @default("pending") @db.VarChar(20)
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @default(now()) @updatedAt @map("updated_at")
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studio             Studio              @relation(fields: [studioId], references: [id], onDelete: Restrict)
+  payment            Payment?
+  reservationDetails ReservationDetail[]
+
+  @@index([userId], map: "idx_reservations_user_id")
+  @@index([studioId], map: "idx_reservations_studio_id")
+  @@index([waktuMulai, waktuSelesai], map: "idx_reservations_waktu")
+  @@map("reservations")
+}
+
+model ReservationDetail {
+  id            Int         @id @default(autoincrement())
+  reservationId Int         @map("reservation_id")
+  equipmentId   Int         @map("equipment_id")
+  jumlah        Int
+  hargaSnapshot Decimal     @map("harga_snapshot") @db.Decimal(12, 2)
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  equipment     Equipment   @relation(fields: [equipmentId], references: [id], onDelete: Restrict)
+
+  @@index([reservationId], map: "idx_reservation_details_res_id")
+  @@map("reservation_details")
+}
+
+model Payment {
+  id               Int         @id @default(autoincrement())
+  reservationId    Int         @unique @map("reservation_id")
+  metodePembayaran String      @map("metode_pembayaran") @db.VarChar(50)
+  jumlahBayar      Decimal     @map("jumlah_bayar") @db.Decimal(12, 2)
+  statusPembayaran String      @default("pending") @map("status_pembayaran") @db.VarChar(20)
+  tokenTransaksi   String      @unique @map("token_transaksi") @db.VarChar(255)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  reservation      Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([statusPembayaran], map: "idx_payments_status")
+  @@map("payments")
+}
+

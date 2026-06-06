@@ -36,46 +36,33 @@ const campusEvents = [
 
 export default function UpcomingEventBanner() {
   return (
-    <section className="radar-section" style={{ marginTop: '0', marginBottom: '24px' }} id="radar-section-anchor">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '1.6rem', textTransform: 'uppercase' }}>📡 Radar Event Kampus</h2>
+    <section className="m-0 mb-4" id="radar-section-anchor">
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-lg md:text-xl uppercase">📡 Radar Event Kampus</h2>
       </div>
 
-      <div className="radar-carousel" style={{ paddingBottom: '12px' }}>
+      <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
         {campusEvents.map(event => (
-          <div key={event.id} className="event-card neo-card" style={{
-            flex: '0 0 300px',
-            padding: '20px',
-            marginBottom: '0',
-            backgroundColor: 'var(--bg-white)',
-            justifyContent: 'space-between',
-          }}>
+          <div key={event.id} className="neo-card flex-shrink-0 w-[230px] md:w-[250px] snap-start !p-4 !mb-0 bg-white flex flex-col justify-between">
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <div className="flex justify-between items-center mb-2">
                 <span className="neo-badge" style={{ backgroundColor: event.badgeColor, color: event.badgeColor === 'var(--accent-blue)' ? '#fff' : '#000' }}>
                   {event.badge}
                 </span>
-                <span style={{ fontSize: '1.5rem' }}>{event.emoji}</span>
+                <span className="text-xl">{event.emoji}</span>
               </div>
               
-              <h4 className="event-title" style={{ minHeight: '48px', fontSize: '1.1rem', marginBottom: '4px' }}>
+              <h4 className="font-extrabold text-[13px] md:text-sm mb-0.5 min-h-[40px] leading-snug">
                 {event.title}
               </h4>
               
-              <div style={{ fontSize: '0.8rem', color: 'rgba(26, 26, 26, 0.6)', fontWeight: 600, marginBottom: '16px' }}>
+              <div className="text-[10px] md:text-xs text-neo-black/60 font-semibold mb-3">
                 Oleh: {event.organizer}
               </div>
             </div>
 
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              borderTop: '2px dashed var(--color-black)',
-              paddingTop: '12px',
-              marginTop: '12px'
-            }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-blue)' }}>
+            <div className="flex justify-between items-center border-t-2 border-dashed border-neo-black pt-2.5 mt-2.5">
+              <span className="text-xs font-black text-blue">
                 {event.date}
               </span>
               
@@ -83,8 +70,7 @@ export default function UpcomingEventBanner() {
                 href={event.link} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="neo-btn small sky"
-                style={{ textDecoration: 'none', margin: '0' }}
+                className="neo-btn small sky !m-0"
               >
                 Daftar ➡️
               </a>

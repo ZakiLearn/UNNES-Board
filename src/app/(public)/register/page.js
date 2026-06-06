@@ -54,31 +54,18 @@ export default function RegisterPage() {
   if (isLoggedIn) return null;
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '40px 0'
-    }}>
-      <div className="neo-card" style={{ width: '100%', maxWidth: '440px', padding: '32px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <span style={{ fontSize: '2.5rem' }}>📝</span>
-          <h2 style={{ fontSize: '1.8rem', textTransform: 'uppercase', marginTop: '12px' }}>Daftar UnnesBoard</h2>
-          <p style={{ color: 'rgba(26,26,26,0.6)', fontWeight: 600, fontSize: '0.9rem' }}>
+    <div className="flex justify-center items-center py-10 px-4">
+      <div className="neo-card w-full max-w-[440px] !p-8 !mb-0">
+        <div className="text-center mb-6">
+          <span className="text-4xl block mb-3">📝</span>
+          <h2 className="text-2xl uppercase mt-3">Daftar UnnesBoard</h2>
+          <p className="text-neo-black/60 font-semibold text-sm">
             Buat akun untuk mulai berinteraksi dengan mahasiswa lainnya
           </p>
         </div>
 
         {error && (
-          <div style={{
-            backgroundColor: 'var(--accent-orange)',
-            border: 'var(--border-stroke)',
-            borderRadius: 'var(--border-radius-sm)',
-            padding: '10px 14px',
-            fontWeight: 800,
-            fontSize: '0.85rem',
-            marginBottom: '16px'
-          }}>
+          <div className="bg-orange border-2 border-neo-black rounded-sm p-3 font-extrabold text-xs mb-4">
             ⚠️ {error}
           </div>
         )}
@@ -110,7 +97,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="form-group" style={{ marginBottom: '24px' }}>
+          <div className="form-group mb-6">
             <label className="form-label" htmlFor="register-password">Kata Sandi</label>
             <input
               type="password"
@@ -125,24 +112,16 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="neo-btn blue"
-            style={{ width: '100%', justifyContent: 'center', fontSize: '1.05rem', padding: '12px' }}
+            className="neo-btn blue w-full justify-center text-lg py-3"
             disabled={loading}
           >
             {loading ? 'Membuat Akun...' : 'Daftar Sekarang 🚀'}
           </button>
         </form>
 
-        <div style={{
-          marginTop: '24px',
-          textAlign: 'center',
-          fontWeight: 700,
-          fontSize: '0.9rem',
-          borderTop: 'var(--border-stroke)',
-          paddingTop: '16px'
-        }}>
+        <div className="mt-6 text-center font-bold text-sm border-t-2 border-neo-black pt-4">
           Sudah punya akun?{' '}
-          <Link href="/login" style={{ color: 'var(--accent-blue)', textDecoration: 'underline' }}>
+          <Link href="/login" className="text-blue underline">
             Masuk di sini
           </Link>
         </div>

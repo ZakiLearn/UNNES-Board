@@ -23,12 +23,12 @@ export default function CreateCommunityPage() {
   const logoOptions = ['👾', '⚽', '🍗', '🎮', '🎶', '📚', '🎬', '🎨', '🏕️', '📸'];
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
-      <div className="neo-card" style={{ width: '100%', maxWidth: '520px', padding: '32px' }}>
-        <h2 style={{ fontSize: '1.8rem', textTransform: 'uppercase', marginBottom: '8px', textAlign: 'center' }}>
+    <div className="flex justify-center items-center py-5">
+      <div className="neo-card w-full max-w-[520px] !p-8 !mb-0">
+        <h2 className="text-xl md:text-2xl uppercase mb-2 text-center">
           🤝 Usulkan Komunitas Baru
         </h2>
-        <p style={{ color: 'rgba(26,26,26,0.6)', fontWeight: 600, fontSize: '0.9rem', marginBottom: '24px', textAlign: 'center' }}>
+        <p className="text-neo-black/60 font-semibold text-xs md:text-sm mb-6 text-center">
           Ajukan pembuatan papan komunitas hobi, olahraga, atau tongkrongan mahasiswa baru.
         </p>
 
@@ -47,7 +47,7 @@ export default function CreateCommunityPage() {
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="grid grid-cols-2 gap-4">
             <div className="form-group">
               <label className="form-label" htmlFor="group-category">Kategori</label>
               <select
@@ -78,33 +78,30 @@ export default function CreateCommunityPage() {
             </div>
           </div>
 
-          <div className="form-group" style={{ marginBottom: '24px' }}>
+          <div className="form-group mb-6">
             <label className="form-label" htmlFor="group-desc">Deskripsi & Aturan Papan</label>
             <textarea
               id="group-desc"
-              className="form-control"
+              className="form-control h-28"
               placeholder="Jelaskan tujuan grup, tipe anggota, dan aturan dasar berkumpul..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
               maxLength={300}
-              style={{ minHeight: '100px' }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="flex gap-3">
             <button 
               type="button" 
-              className="neo-btn small sky"
+              className="neo-btn small sky w-full justify-center !m-0 !py-3"
               onClick={() => router.back()}
-              style={{ flexGrow: 1, justifyContent: 'center', margin: 0, padding: '12px' }}
             >
               Batal
             </button>
             <button 
               type="submit" 
-              className="neo-btn small blue"
-              style={{ flexGrow: 2, justifyContent: 'center', margin: 0, padding: '12px' }}
+              className="neo-btn small blue w-full justify-center !m-0 !py-3"
             >
               Kirim Usulan 🚀
             </button>

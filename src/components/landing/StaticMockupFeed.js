@@ -24,42 +24,38 @@ export default function StaticMockupFeed() {
   ];
 
   return (
-    <section style={{ marginTop: '40px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '2.4rem', textTransform: 'uppercase' }}>Sekilas Info UnnesBoard 📡</h2>
-        <p style={{ color: 'rgba(26,26,26,0.7)', fontWeight: 600 }}>Apa saja yang sedang ramai dibicarakan hari ini?</p>
+    <section className="mt-10">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl md:text-4xl uppercase mb-2">Sekilas Info UnnesBoard 📡</h2>
+        <p className="text-neo-black/70 font-semibold">Apa saja yang sedang ramai dibicarakan hari ini?</p>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1.8fr 1.2fr',
-        gap: '32px',
-      }} className="landing-mockup-grid">
+      <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1.2fr] gap-8">
         
         {/* Left Side: Mockup Feed */}
         <div>
-          <h3 style={{ marginBottom: '16px', textTransform: 'uppercase', fontSize: '1.2rem' }}>💬 Cerita Mahasiswa</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 className="mb-4 uppercase text-lg">💬 Cerita Mahasiswa</h3>
+          <div className="flex flex-col gap-4">
             {mockupPosts.map(post => (
-              <div key={post.id} className="neo-card" style={{ marginBottom: '0' }}>
-                <div className="menfess-header">
-                  <div className="menfess-meta">
-                    <div className="avatar-abstract" style={{ backgroundColor: 'var(--accent-sky)' }}>
+              <div key={post.id} className="neo-card !mb-0">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full border-2 border-neo-black flex items-center justify-center text-lg font-bold bg-sky">
                       {post.sender.charAt(0)}
                     </div>
                     <div>
-                      <div className="menfess-sender">{post.sender} ➡️ {post.recipient}</div>
-                      <div className="menfess-time">{post.time}</div>
+                      <div className="font-extrabold text-sm">{post.sender} ➡️ {post.recipient}</div>
+                      <div className="text-[10px] text-neo-black/50 font-semibold">{post.time}</div>
                     </div>
                   </div>
-                  <span className="neo-badge" style={{ backgroundColor: 'var(--bg-cream)' }}>#{post.tag}</span>
+                  <span className="neo-badge !bg-cream">#{post.tag}</span>
                 </div>
-                <p className="menfess-body" style={{ fontSize: '1rem', fontWeight: 600 }}>{post.content}</p>
+                <p className="text-base font-semibold mb-4 text-neo-black">{post.content}</p>
                 
-                <div className="menfess-reactions" style={{ borderTop: 'var(--border-stroke)', paddingTop: '12px' }}>
-                  <button className="reaction-btn" disabled>🔥 {post.reactions.fire}</button>
-                  <button className="reaction-btn" disabled>😂 {post.reactions.laugh}</button>
-                  <button className="reaction-btn" disabled>❤️ {post.reactions.heart}</button>
+                <div className="flex gap-3 border-t-2 border-neo-black pt-3">
+                  <button className="reaction-btn hover:translate-y-0 cursor-default" disabled>🔥 {post.reactions.fire}</button>
+                  <button className="reaction-btn hover:translate-y-0 cursor-default" disabled>😂 {post.reactions.laugh}</button>
+                  <button className="reaction-btn hover:translate-y-0 cursor-default" disabled>❤️ {post.reactions.heart}</button>
                 </div>
               </div>
             ))}
@@ -67,48 +63,45 @@ export default function StaticMockupFeed() {
         </div>
 
         {/* Right Side: Mockup Widgets */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="flex flex-col gap-6">
           {/* Polling Widget */}
-          <div className="neo-card" style={{ marginBottom: '0' }}>
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '12px' }}>🌊 Tes Ombak Harian</h3>
-            <p style={{ fontWeight: 800, fontSize: '0.95rem', marginBottom: '16px' }}>
+          <div className="neo-card !mb-0">
+            <h3 className="text-lg mb-3">🌊 Tes Ombak Harian</h3>
+            <p className="font-extrabold text-sm mb-4">
               Berapa kali kalian makan geprek dalam satu minggu?
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div className="poll-option" style={{ padding: '10px 14px', margin: '0' }}>
-                <div className="poll-option-content" style={{ fontSize: '0.85rem' }}>
+            <div className="flex flex-col gap-2">
+              <div className="bg-white border-2 border-neo-black rounded-md p-3 relative overflow-hidden transition-all duration-150">
+                <div className="absolute top-0 left-0 bottom-0 w-[42%] bg-orange/35 z-0"></div>
+                <div className="relative z-10 flex justify-between font-bold text-xs">
                   <span>Setiap hari (Geprek is life)</span>
-                  <span style={{ color: 'var(--accent-blue)' }}>42%</span>
+                  <span className="text-blue">42%</span>
                 </div>
               </div>
-              <div className="poll-option" style={{ padding: '10px 14px', margin: '0' }}>
-                <div className="poll-option-content" style={{ fontSize: '0.85rem' }}>
+              <div className="bg-white border-2 border-neo-black rounded-md p-3 relative overflow-hidden transition-all duration-150">
+                <div className="absolute top-0 left-0 bottom-0 w-[48%] bg-orange/35 z-0"></div>
+                <div className="relative z-10 flex justify-between font-bold text-xs">
                   <span>2-3 kali seminggu</span>
-                  <span style={{ color: 'var(--accent-blue)' }}>48%</span>
+                  <span className="text-blue">48%</span>
                 </div>
               </div>
-              <div className="poll-option" style={{ padding: '10px 14px', margin: '0' }}>
-                <div className="poll-option-content" style={{ fontSize: '0.85rem' }}>
+              <div className="bg-white border-2 border-neo-black rounded-md p-3 relative overflow-hidden transition-all duration-150">
+                <div className="absolute top-0 left-0 bottom-0 w-[10%] bg-orange/35 z-0"></div>
+                <div className="relative z-10 flex justify-between font-bold text-xs">
                   <span>Jarang / Tidak pernah</span>
-                  <span style={{ color: 'var(--accent-blue)' }}>10%</span>
+                  <span className="text-blue">10%</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* CTA Box */}
-          <div className="neo-card" style={{
-            backgroundColor: 'var(--accent-mint)',
-            marginBottom: '0',
-            textAlign: 'center',
-            padding: '24px',
-            borderWidth: '3px'
-          }}>
-            <h3 style={{ textTransform: 'uppercase', marginBottom: '8px' }}>Ingin Ikut Berbagi Cerita?</h3>
-            <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '16px' }}>
+          <div className="neo-card !mb-0 text-center p-6 !bg-mint border-4 border-neo-black">
+            <h3 className="uppercase mb-2 text-lg">Ingin Ikut Berbagi Cerita?</h3>
+            <p className="text-sm font-semibold mb-4 leading-relaxed text-neo-black/80">
               Masuk dengan akun mahasiswa UNNES Anda sekarang juga untuk mulai mengirim menfess, membuat polling, dan berdiskusi.
             </p>
-            <Link href="/register" className="neo-btn blue" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/register" className="neo-btn blue w-full justify-center">
               Daftar Akun Baru 🚀
             </Link>
           </div>

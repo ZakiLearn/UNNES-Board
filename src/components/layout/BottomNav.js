@@ -14,22 +14,19 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="mobile-navbar" style={{ display: 'block' }}>
-      <div className="mobile-nav-links">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-neo-black z-40 p-3 block md:hidden">
+      <div className="flex justify-around items-center">
         {navItems.map(item => {
           const isActive = pathname.startsWith(item.path);
           return (
             <Link 
               key={item.path} 
               href={item.path} 
-              className="mobile-nav-link"
-              style={{
-                color: isActive ? 'var(--accent-blue)' : 'var(--color-black)',
-                fontWeight: isActive ? '800' : '500',
-                textDecoration: 'none',
-              }}
+              className={`flex flex-col items-center no-underline text-xs font-heading gap-1 font-extrabold transition-colors duration-150 ${
+                isActive ? 'text-blue' : 'text-neo-black'
+              }`}
             >
-              <span style={{ fontSize: '1.4rem' }}>{item.icon}</span>
+              <span className="text-2xl">{item.icon}</span>
               <span>{item.name}</span>
             </Link>
           );

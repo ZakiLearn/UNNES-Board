@@ -4,85 +4,44 @@ export default function ProductCard({ product, onContactSeller }) {
   const isAvailable = product.status === 'Tersedia';
 
   return (
-    <div className="neo-card interactive" style={{
-      margin: 0,
-      backgroundColor: 'var(--bg-white)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-    }}>
+    <div className="neo-card interactive !m-0 bg-white flex flex-col justify-between">
       <div>
         {/* Product image mockup */}
-        <div style={{
-          aspectRatio: '16/10',
-          background: 'var(--bg-cream)',
-          border: 'var(--border-stroke)',
-          borderRadius: 'var(--border-radius-md)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '3rem',
-          marginBottom: '16px',
-          boxShadow: 'inner 2px 2px 0 0 var(--color-black)',
-          position: 'relative'
-        }}>
+        <div className="aspect-[16/10] bg-cream border-2 border-neo-black rounded-md flex items-center justify-center text-5xl mb-4 relative shadow-[inset_2px_2px_0_0_#1A1A1A]">
           {product.image || '📦'}
-          <span className="neo-badge" style={{
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            backgroundColor: isAvailable ? 'var(--accent-mint)' : 'var(--accent-orange)',
-            fontSize: '0.65rem'
-          }}>
+          <span className={`neo-badge absolute top-2 right-2 !text-[10px] !py-0.5 !px-2 ${
+            isAvailable ? '!bg-mint' : '!bg-orange'
+          }`}>
             {product.status}
           </span>
         </div>
 
         {/* Product Details */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-          <h4 style={{ fontSize: '1.1rem', lineHeight: '1.2' }}>{product.title}</h4>
-          <span className="neo-badge" style={{ backgroundColor: 'var(--bg-white)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+        <div className="flex justify-between items-start mb-2">
+          <h4 className="text-base md:text-lg leading-tight m-0">{product.title}</h4>
+          <span className="neo-badge !bg-white !text-[10px] !py-0.5 !px-2 whitespace-nowrap">
             {product.condition}
           </span>
         </div>
 
-        <div style={{
-          fontSize: '1.2rem',
-          fontWeight: 900,
-          color: 'var(--accent-blue)',
-          marginBottom: '8px'
-        }}>
+        <div className="text-lg md:text-xl font-black text-blue mb-2">
           {product.price}
         </div>
 
-        <p style={{
-          fontSize: '0.85rem',
-          color: 'rgba(26,26,26,0.7)',
-          fontWeight: 600,
-          marginBottom: '16px',
-          lineHeight: '1.4'
-        }}>
+        <p className="text-xs md:text-sm text-neo-black/70 font-semibold mb-4 leading-relaxed">
           {product.description}
         </p>
       </div>
 
       {/* Footer / Actions */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderTop: '2px dashed var(--color-black)',
-        paddingTop: '12px',
-        marginTop: '12px'
-      }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'rgba(26,26,26,0.5)' }}>
+      <div className="flex justify-between items-center border-t-2 border-dashed border-neo-black pt-3 mt-3">
+        <div className="text-[10px] md:text-xs font-bold text-neo-black/50">
           📍 {product.location}
         </div>
 
         <button 
           onClick={() => onContactSeller(product.seller)}
-          className="neo-btn small blue"
-          style={{ padding: '6px 12px', fontSize: '0.75rem', margin: 0 }}
+          className="neo-btn small blue !m-0 !py-1 !px-2.5 text-[10px] md:text-xs"
         >
           Hubungi Penjual 💬
         </button>

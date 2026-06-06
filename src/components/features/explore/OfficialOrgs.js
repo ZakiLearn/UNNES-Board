@@ -8,58 +8,28 @@ const officialCommunities = [
 
 export default function OfficialOrgs({ onSelectBoard }) {
   return (
-    <div style={{ marginBottom: '32px' }}>
-      <h3 style={{ textTransform: 'uppercase', marginBottom: '16px', fontSize: '1.3rem' }}>
+    <div className="mb-8">
+      <h3 className="uppercase mb-4 text-base md:text-lg">
         🏛️ Papan Resmi Organisasi (Official Boards)
       </h3>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: '20px'
-      }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {officialCommunities.map(org => (
-          <div key={org.id} className="neo-card interactive" style={{
-            margin: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            backgroundColor: 'var(--bg-white)',
-          }} onClick={() => onSelectBoard(org.name)}>
+          <div key={org.id} className="neo-card interactive !m-0 flex flex-col justify-between bg-white" onClick={() => onSelectBoard(org.name)}>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <div style={{
-                  fontSize: '1.8rem',
-                  background: 'var(--accent-sky)',
-                  border: 'var(--border-stroke)',
-                  borderRadius: 'var(--border-radius-sm)',
-                  width: '45px',
-                  height: '45px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '2px 2px 0 0 var(--color-black)'
-                }}>{org.logo}</div>
-                <span className="neo-badge" style={{ backgroundColor: 'var(--accent-orange)' }}>
+              <div className="flex justify-between items-center mb-3">
+                <div className="text-3xl bg-sky border-2 border-neo-black rounded-sm w-[45px] h-[45px] flex items-center justify-center shadow-[2px_2px_0_0_#1A1A1A]">{org.logo}</div>
+                <span className="neo-badge !bg-orange">
                   {org.tag}
                 </span>
               </div>
-              <h4 style={{ fontSize: '1.1rem', marginBottom: '6px' }}>{org.name}</h4>
-              <p style={{ fontSize: '0.85rem', color: 'rgba(26,26,26,0.7)', fontWeight: 600, marginBottom: '16px' }}>
+              <h4 className="text-base md:text-lg mb-1">{org.name}</h4>
+              <p className="text-xs md:text-sm text-neo-black/70 font-semibold mb-4">
                 {org.description}
               </p>
             </div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              borderTop: '2px dashed var(--color-black)',
-              paddingTop: '12px',
-              marginTop: '12px',
-              fontSize: '0.8rem',
-              fontWeight: 800
-            }}>
-              <span style={{ color: 'rgba(26,26,26,0.6)' }}>👥 {org.members} Pengikut</span>
-              <span style={{ color: 'var(--accent-blue)', textDecoration: 'underline' }}>Intip Papan ➡️</span>
+            <div className="flex justify-between items-center border-t-2 border-dashed border-neo-black pt-3 mt-3 text-xs font-black">
+              <span className="text-neo-black/60">👥 {org.members} Pengikut</span>
+              <span className="text-blue underline">Intip Papan ➡️</span>
             </div>
           </div>
         ))}

@@ -1,25 +1,11 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 
-export default function ChatRoom({ chat }) {
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'them', text: 'Halo bro, nanya tugas lab yang kemarin dong' },
-    { id: 2, sender: 'me', text: 'Halo! Yang mana ya? Yang disuruh bikin laporan praktikum?' },
-    { id: 3, sender: 'them', text: 'Iya betul, formatnya pake Word atau tulis tangan ya?' },
-  ]);
+export default function ChatRoom({ chat, onSendMessage }) {
   const [inputText, setInputText] = useState('');
   const chatEndRef = useRef(null);
 
-  useEffect(() => {
-    // Reset messages for different chats
-    if (chat) {
-      setMessages([
-        { id: 1, sender: 'them', text: `Halo! Ini ${chat.name} di sini.` },
-        { id: 2, sender: 'me', text: `Hai ${chat.name}, ada apa nih?` },
-        { id: 3, sender: 'them', text: chat.lastMessage },
-      ]);
-    }
-  }, [chat]);
+  const messages = chat ? chat.messages || [] : [];
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,135 +15,66 @@ export default function ChatRoom({ chat }) {
     e.preventDefault();
     if (!inputText.trim()) return;
 
-    const newMsg = {
-      id: Date.now(),
-      sender: 'me',
-      text: inputText.trim()
-    };
-
-    setMessages([...messages, newMsg]);
+    onSendMessage(chat.id, inputText);
     setInputText('');
-
-    // Simulate auto response from target after 1.5s
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: 'them',
-          text: `Sip! Makasih responnya. (Simulated auto-reply) 👍`
-        }
-      ]);
-    }, 1500);
   };
 
   if (!chat) {
     return (
-      <div className="neo-card" style={{
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        textAlign: 'center',
-        padding: '40px 20px',
-        color: 'rgba(26,26,26,0.6)',
-        marginBottom: 0
-      }}>
-        <span style={{ fontSize: '3rem' }}>💬</span>
-        <h3 style={{ marginTop: '16px' }}>Pilih obrolan untuk memulai chat</h3>
-        <p style={{ marginTop: '8px', fontSize: '0.9rem', fontWeight: 600 }}>100% obrolan dienkripsi dan anonim secara default.</p>
+      <div className="neo-card flex flex-col justify-center items-center text-center p-10 text-neo-black/60 h-full !mb-0">
+        <span className="text-5xl block mb-3">💬</span>
+        <h3 className="mt-4">Pilih obrolan untuk memulai chat</h3>
+        <p className="mt-2 text-sm font-semibold">100% obrolan dienkripsi dan anonim secara default.</p>
       </div>
     );
   }
 
   return (
-    <div className="neo-card" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      padding: '20px',
-      marginBottom: 0
-    }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        borderBottom: 'var(--border-stroke)',
-        paddingBottom: '12px',
-        marginBottom: '16px'
-      }}>
-        <div style={{
-          fontSize: '1.5rem',
-          background: 'var(--bg-cream)',
-          border: 'var(--border-stroke)',
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>{chat.avatar}</div>
-        <div>
-          <h3 style={{ fontSize: '1.05rem', margin: 0 }}>{chat.name}</h3>
-          <span className="neo-badge" style={{ backgroundColor: 'var(--accent-mint)', fontSize: '0.6rem', padding: '1px 6px' }}>Aktif</span>
+    <div className="neo-card flex flex-col h-full !p-4 !mb-0 min-h-[500px] justify-between">
+      <div>
+        {/* Header */}
+        <div className="flex items-center gap-3 border-b-2 border-neo-black pb-3 mb-4">
+          <div className="text-xl bg-cream border-2 border-neo-black rounded-full w-9 h-9 flex items-center justify-center flex-shrink-0">
+            {chat.avatar}
+          </div>
+          <div>
+            <h3 className="text-base m-0 leading-tight">{chat.name}</h3>
+            <span className="neo-badge !bg-mint !text-[9px] !py-0.5 !px-1.5 mt-1">Aktif</span>
+          </div>
+        </div>
+
+        {/* Messages Log */}
+        <div className="flex-grow overflow-y-auto flex flex-col gap-3 pr-1 mb-4 max-h-[300px] md:max-h-[350px]">
+          {messages.map(msg => {
+            const isMe = msg.sender === 'me';
+            return (
+              <div
+                key={msg.id}
+                className={`max-w-[75%] rounded-md border-2 border-neo-black px-4 py-2.5 text-xs md:text-sm font-semibold shadow-[2px_2px_0_0_#1a1a1a] ${
+                  isMe 
+                    ? 'self-end bg-blue text-white' 
+                    : 'self-start bg-white text-neo-black shadow-[2px_2px_0_0_rgba(0,0,0,0.15)]'
+                }`}
+              >
+                {msg.text}
+              </div>
+            );
+          })}
+          <div ref={chatEndRef} />
         </div>
       </div>
 
-      {/* Messages Log */}
-      <div style={{
-        flexGrow: 1,
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        paddingRight: '4px',
-        marginBottom: '16px',
-        maxHeight: '400px'
-      }}>
-        {messages.map(msg => {
-          const isMe = msg.sender === 'me';
-          return (
-            <div
-              key={msg.id}
-              style={{
-                alignSelf: isMe ? 'flex-end' : 'flex-start',
-                maxWidth: '75%',
-                backgroundColor: isMe ? 'var(--accent-blue)' : 'var(--bg-white)',
-                color: isMe ? 'var(--bg-white)' : 'var(--color-black)',
-                border: 'var(--border-stroke)',
-                borderRadius: 'var(--border-radius-md)',
-                padding: '10px 16px',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                boxShadow: isMe ? '2px 2px 0 0 var(--color-black)' : '2px 2px 0 0 rgba(0,0,0,0.15)',
-              }}
-            >
-              {msg.text}
-            </div>
-          );
-        })}
-        <div ref={chatEndRef} />
-      </div>
-
       {/* Input Form */}
-      <form onSubmit={handleSendMessage} style={{
-        display: 'flex',
-        gap: '12px',
-        borderTop: 'var(--border-stroke)',
-        paddingTop: '16px'
-      }}>
+      <form onSubmit={handleSendMessage} className="flex gap-3 border-t-2 border-neo-black pt-4 mt-auto">
         <input
           type="text"
-          className="form-control"
+          className="form-control !p-2.5 !m-0 flex-grow !text-xs"
           placeholder="Tulis pesan..."
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          style={{ flexGrow: 1, padding: '10px 16px', margin: 0 }}
           required
         />
-        <button type="submit" className="neo-btn blue" style={{ padding: '10px 20px', margin: 0 }}>
+        <button type="submit" className="neo-btn blue small !m-0 !py-2.5 !px-4 flex-shrink-0">
           Kirim 🚀
         </button>
       </form>

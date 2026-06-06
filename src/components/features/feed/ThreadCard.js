@@ -52,50 +52,48 @@ export default function ThreadCard({ post, userReactions, onReaction }) {
   };
 
   return (
-    <article className="neo-card menfess-card" style={{ padding: '20px', marginBottom: '16px' }}>
-      <div className="menfess-header">
-        <div className="menfess-meta">
-          <div className="avatar-abstract" style={{ backgroundColor: 'var(--accent-sky)' }}>
+    <article className="neo-card !p-4 !mb-3">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full border-2 border-neo-black flex items-center justify-center text-base font-bold bg-sky flex-shrink-0">
             {avatar}
           </div>
           <div>
-            <div className="menfess-sender">
+            <div className="font-extrabold text-xs text-neo-black">
               {post.sender} 
-              <span style={{ fontWeight: 400, color: 'rgba(26,26,26,0.6)', marginLeft: '6px' }}>
+              <span className="font-normal text-neo-black/60 ml-1.5 text-[10px]">
                 untuk {post.recipient}
               </span>
             </div>
-            <div className="menfess-time">{timeAgo(post.timestamp)} yang lalu</div>
+            <div className="text-[9px] text-neo-black/50 font-semibold">{timeAgo(post.timestamp)} yang lalu</div>
           </div>
         </div>
-        <span className="neo-badge" style={{ backgroundColor: 'var(--bg-cream)' }}>
+        <span className="neo-badge !bg-cream">
           #{post.tag}
         </span>
       </div>
 
-      <p className="menfess-body" style={{ fontSize: '1rem', fontWeight: 600, marginTop: '8px', marginBottom: '16px' }}>
+      <p className="text-sm font-semibold text-neo-black mt-1.5 mb-3 leading-relaxed">
         {post.content}
       </p>
 
       {/* Footer / Actions */}
-      <div className="menfess-reactions" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderTop: 'var(--border-stroke)',
-        paddingTop: '12px'
-      }}>
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="flex items-center justify-between border-t-2 border-neo-black pt-2.5">
+        <div className="flex gap-1.5">
           {reactionsList.map(type => {
-            const reacted = userReactions[`post-${post.id}-${type}`] ? 'reacted' : '';
+            const reacted = userReactions[`post-${post.id}-${type}`];
             return (
               <button 
                 key={type} 
-                className={`reaction-btn ${reacted}`}
+                className={`px-2 py-1 text-xs font-bold rounded-sm border-2 border-neo-black transition-all duration-150 flex items-center gap-1.5 ${
+                  reacted 
+                    ? 'bg-mint translate-x-[1px] translate-y-[1px] shadow-none' 
+                    : 'bg-white shadow-[2px_2px_0px_0px_#1A1A1A] hover:translate-x-[0.5px] hover:translate-y-[0.5px] hover:shadow-[1px_1px_0px_0px_#1A1A1A]'
+                }`}
                 onClick={() => onReaction(post.id, type)}
-                style={{ padding: '4px 10px', fontSize: '0.85rem' }}
               >
-                {emojis[type]} <span>{post.reactions[type] || 0}</span>
+                <span>{emojis[type]}</span>
+                <span>{post.reactions[type] || 0}</span>
               </button>
             );
           })}
@@ -103,46 +101,34 @@ export default function ThreadCard({ post, userReactions, onReaction }) {
 
         <button 
           onClick={() => setShowComments(!showComments)}
-          className="reaction-btn"
-          style={{ padding: '4px 10px', fontSize: '0.85rem' }}
+          className="px-2 py-1 text-xs font-bold rounded-sm border-2 border-neo-black transition-all duration-150 flex items-center gap-1.5 bg-white shadow-[2px_2px_0px_0px_#1A1A1A] hover:translate-x-[0.5px] hover:translate-y-[0.5px] hover:shadow-[1px_1px_0px_0px_#1A1A1A]"
         >
-          💬 <span>{comments.length} Komentar</span>
+          <span>💬</span> <span>{comments.length} Komentar</span>
         </button>
       </div>
 
       {/* Expanded Comments Drawer */}
       {showComments && (
-        <div style={{
-          marginTop: '16px',
-          paddingTop: '16px',
-          borderTop: '2px dashed var(--color-black)'
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+        <div className="mt-4 pt-4 border-t-2 border-dashed border-neo-black">
+          <div className="flex flex-col gap-2 mb-3">
             {comments.map(c => (
-              <div key={c.id} style={{
-                background: 'var(--bg-dark-white)',
-                border: 'var(--border-stroke)',
-                borderRadius: 'var(--border-radius-sm)',
-                padding: '8px 12px',
-                fontSize: '0.85rem'
-              }}>
-                <span style={{ fontWeight: 800, color: 'var(--accent-blue)' }}>{c.sender}: </span>
-                <span style={{ fontWeight: 600 }}>{c.text}</span>
+              <div key={c.id} className="bg-dark-white border-2 border-neo-black rounded-sm px-3 py-2 text-xs font-semibold">
+                <span className="font-extrabold text-blue">{c.sender}: </span>
+                <span>{c.text}</span>
               </div>
             ))}
           </div>
 
-          <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '8px' }}>
+          <form onSubmit={handleAddComment} className="flex gap-2">
             <input 
               type="text" 
-              className="form-control" 
+              className="form-control !p-2 !text-xs !shadow-neo-sm flex-grow" 
               placeholder="Tulis balasan..."
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              style={{ padding: '8px 12px', fontSize: '0.85rem', flexGrow: 1 }}
               required
             />
-            <button type="submit" className="neo-btn small blue" style={{ padding: '8px 12px', margin: '0' }}>
+            <button type="submit" className="neo-btn small blue !m-0 !py-2 !px-3 font-bold">
               Kirim
             </button>
           </form>
