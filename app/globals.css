@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #F7E59E; /* Exactly matched warmer cream from screenshots */
+  --color-orange: #FFA62B;
+  --color-blue: #2E5AA7; /* Deep blue used for active buttons and accents */
+  --color-sky: #86C5FF;
+  --color-mint: #A3E6B5;
+  --color-neo-black: #1A1A1A;
+  --color-dark-white: #F9F9F9;
+  
+  --font-heading: "Outfit", sans-serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+
+  --shadow-neo: 4px 4px 0px 0px #1A1A1A;
+  --shadow-neo-hover: 2px 2px 0px 0px #1A1A1A;
+  --shadow-neo-sm: 2px 2px 0px 0px #1A1A1A;
+}
+
+:root {
+  --background: #F7E59E; /* Warmer cream background */
+  --foreground: #1A1A1A;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Custom Neo-Brutalist Components matching the reference screenshots */
+
+.neo-card {
+  background-color: #ffffff;
+  border: 2px solid #1A1A1A;
+  border-radius: 16px; /* 16px border radius matches screenshots */
+  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  padding: 1.5rem;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-card.interactive:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px #1A1A1A;
+}
+
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff; /* Default is white card/button */
+  color: #1A1A1A;
+  border: 2px solid #1A1A1A;
+  border-radius: 12px; /* Smoother border radius for buttons */
+  box-shadow: 4px 4px 0px 0px #1A1A1A;
+  padding: 0.75rem 1.5rem;
+  font-weight: 800;
+  font-family: "Outfit", sans-serif;
+  cursor: pointer;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px #1A1A1A;
+}
+
+.neo-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.neo-btn.blue {
+  background-color: #2E5AA7;
+  color: #ffffff;
+}
+
+.neo-btn.sky {
+  background-color: #86C5FF;
+  color: #1A1A1A;
+}
+
+.neo-btn.mint {
+  background-color: #A3E6B5;
+  color: #1A1A1A;
+}
+
+.neo-btn.orange {
+  background-color: #FFA62B;
+  color: #1A1A1A;
+}
+
+.neo-btn.small {
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  box-shadow: 2px 2px 0px 0px #1A1A1A;
+}
+
+.neo-btn.small:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px #1A1A1A;
+}
+
+.neo-btn.small:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-family: "Outfit", sans-serif;
+  padding: 0.25rem 0.75rem;
+  border: 2px solid #1A1A1A;
+  border-radius: 8px;
+  background-color: #86C5FF; /* Default Sky */
+  color: #1A1A1A;
+  box-shadow: 2px 2px 0px 0px #1A1A1A;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  font-size: 0.875rem;
+  color: #1A1A1A;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-control {
+  width: 100%;
+  border: 2px solid #1A1A1A;
+  border-radius: 8px;
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  color: #1A1A1A;
+  box-shadow: 2px 2px 0px 0px #1A1A1A;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #1A1A1A;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px 0px #1A1A1A;
+}
