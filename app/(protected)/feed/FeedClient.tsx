@@ -64,6 +64,39 @@ interface FeedClientProps {
   tagsList: string[];
 }
 
+const dummyEvents = [
+  {
+    id: 1,
+    title: "UNNES Music Festival 2026",
+    date: "Kamis, 25 Juni 2026 | 15.00 WIB",
+    location: "Lapangan Rektorat UNNES",
+    description: "Festival musik tahunan terbesar mahasiswa dengan penampilan bintang tamu spesial, bazaar kuliner Sekaran, dan pameran seni mahasiswa.",
+    badge: "Konser Musik 🎸",
+    colorClass: "bg-sky",
+    image: "/events/music.png"
+  },
+  {
+    id: 2,
+    title: "Seminar Nasional: Karir di Era Gen-AI",
+    date: "Senin, 15 Juni 2026 | 09.00 WIB",
+    location: "Auditorium Universitas",
+    description: "Kupas tuntas peluang kerja dan skill krusial yang dicari industri teknologi masa kini bersama para praktisi kecerdasan buatan terkemuka.",
+    badge: "Seminar 💡",
+    colorClass: "bg-mint",
+    image: "/events/ai.png"
+  },
+  {
+    id: 3,
+    title: "Malam Keakraban & Menfess Meetup",
+    date: "Sabtu, 20 Juni 2026 | 18.30 WIB",
+    location: "Gedung Serbaguna Sekaran",
+    description: "Waktunya saling kenal antar angkatan secara santai! Ada live music acoustic, sharing session, dan stand up comedy mahasiswa.",
+    badge: "Sosial 🤝",
+    colorClass: "bg-orange",
+    image: "/events/meetup.png"
+  }
+];
+
 export default function FeedClient({
   initialPosts,
   initialPoll,
@@ -76,6 +109,16 @@ export default function FeedClient({
   const [newComments, setNewComments] = useState<Record<number, string>>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
+  // Events slider state
+  const [activeEventIndex, setActiveEventIndex] = useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveEventIndex((prev) => (prev + 1) % dummyEvents.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [isPending, startTransition] = useTransition();
   const [submittingCommentId, setSubmittingCommentId] = useState<number | null>(null);
   const [votingOptionId, setVotingOptionId] = useState<number | null>(null);
@@ -165,7 +208,95 @@ export default function FeedClient({
     : null;
 
   return (
-    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <div className="max-w-7xl mx-auto space-y-6">
+      
+      {/* Event Carousel Widget */}
+      <div className="neo-card bg-white !p-0 relative overflow-hidden flex flex-col md:flex-row border-2 border-neo-black">
+        {/* Banner Image / Poster */}
+        <div className="w-full md:w-1/4 relative border-b-2 md:border-b-0 md:border-r-2 border-neo-black min-h-[160px] md:min-h-0 bg-neo-black flex items-center justify-center">
+          <img 
+            src={dummyEvents[activeEventIndex].image} 
+            alt={dummyEvents[activeEventIndex].title}
+            className="w-full h-full object-cover select-none"
+          />
+          <div className="absolute top-3 left-3">
+            <span className="neo-badge !bg-white text-[9px] uppercase tracking-wide">
+              Event 📅
+            </span>
+          </div>
+          <div className="absolute bottom-3 left-3">
+            <span className={`neo-badge text-[10px] ${dummyEvents[activeEventIndex].colorClass}`}>
+              {dummyEvents[activeEventIndex].badge}
+            </span>
+          </div>
+        </div>
+
+        {/* Content detail column */}
+        <div className="w-full md:w-3/4 p-5 flex flex-col justify-between bg-white gap-4">
+          <div className="space-y-2">
+            <h4 className="text-xl md:text-2xl font-heading font-black uppercase text-neo-black leading-tight">
+              {dummyEvents[activeEventIndex].title}
+            </h4>
+            
+            <div className="flex flex-wrap gap-2 text-[10px] font-heading font-black text-neo-black/60 pt-1">
+              <span className="bg-cream px-2 py-0.5 border-2 border-neo-black rounded-md">
+                📅 {dummyEvents[activeEventIndex].date}
+              </span>
+              <span className="bg-cream px-2 py-0.5 border-2 border-neo-black rounded-md">
+                📍 {dummyEvents[activeEventIndex].location}
+              </span>
+            </div>
+            
+            <p className="font-body font-bold text-xs md:text-sm text-neo-black/70 leading-relaxed pt-1">
+              {dummyEvents[activeEventIndex].description}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between pt-3 border-t-2 border-neo-black/10">
+            <button className="neo-btn small sky hover:bg-sky/90 transition-all">
+              Detail Acara ➜
+            </button>
+            
+            {/* Navigation controls (prev, dots, next) */}
+            <div className="flex items-center gap-3">
+              {/* Prev Button */}
+              <button 
+                onClick={() => setActiveEventIndex((prev) => (prev - 1 + dummyEvents.length) % dummyEvents.length)}
+                className="w-7 h-7 flex items-center justify-center border-2 border-neo-black bg-white rounded-md hover:bg-dark-white shadow-neo-sm font-bold text-xs select-none active:translate-y-0.5 cursor-pointer"
+                title="Sebelumnya"
+              >
+                ◀
+              </button>
+              
+              {/* Dots Indicators */}
+              <div className="flex gap-1.2">
+                {dummyEvents.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveEventIndex(idx)}
+                    className={`w-3 h-3 rounded-full border-2 border-neo-black transition-all cursor-pointer ${
+                      idx === activeEventIndex ? 'bg-blue scale-110' : 'bg-white hover:bg-dark-white'
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Next Button */}
+              <button 
+                onClick={() => setActiveEventIndex((prev) => (prev + 1) % dummyEvents.length)}
+                className="w-7 h-7 flex items-center justify-center border-2 border-neo-black bg-white rounded-md hover:bg-dark-white shadow-neo-sm font-bold text-xs select-none active:translate-y-0.5 cursor-pointer"
+                title="Berikutnya"
+              >
+                ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
       {/* Main Feed Column */}
       <div className="lg:col-span-2 space-y-6">
         
@@ -485,5 +616,6 @@ export default function FeedClient({
         )}
       </div>
     </div>
+  </div>
   );
 }
