@@ -152,19 +152,50 @@ export default async function Home() {
   }
 
   // Fetch poll options from database, initialize if empty
-  let pollOptions = [];
+  let pollOptions: { id: number; text: string; votes: number }[] = [];
   try {
-    pollOptions = await db.pollOption.findMany();
-    if (pollOptions.length === 0) {
-      await db.pollOption.createMany({
-        data: [
-          { text: "Setiap hari (Geprek is life)", votes: 42 },
-          { text: "2-3 kali seminggu", votes: 48 },
-          { text: "Jarang / Tidak pernah", votes: 10 }
-        ]
+    let poll = await db.poll.findFirst({
+      include: {
+        options: {
+          include: {
+            _count: {
+              select: { votes: true }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    if (!poll) {
+      poll = await db.poll.create({
+        data: {
+          question: "Berapa kali kalian makan geprek dalam satu minggu?",
+          options: {
+            create: [
+              { text: "Setiap hari (Geprek is life)" },
+              { text: "2-3 kali seminggu" },
+              { text: "Jarang / Tidak pernah" }
+            ]
+          }
+        },
+        include: {
+          options: {
+            include: {
+              _count: {
+                select: { votes: true }
+              }
+            }
+          }
+        }
       });
-      pollOptions = await db.pollOption.findMany();
     }
+
+    pollOptions = poll.options.map(opt => ({
+      id: opt.id,
+      text: opt.text,
+      votes: opt._count.votes
+    }));
   } catch (error) {
     console.error("Database error fetching poll options:", error);
     pollOptions = [

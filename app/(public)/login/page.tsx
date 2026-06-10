@@ -1,11 +1,11 @@
 'use client';
 
 import Link from "next/link";
-import React, { useActionState } from "react";
+import React, { useActionState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { login } from "@/app/auth/actions";
 
-export default function LoginPage() {
+function LoginForm() {
   const [state, formAction, isPending] = useActionState(login, null);
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
@@ -94,6 +94,20 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6 text-center py-12">
+        <div className="text-sm font-heading font-bold text-neo-black/60 animate-pulse">
+          Memuat halaman masuk...
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
 
