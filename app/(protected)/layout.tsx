@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { 
   Home, 
   Search, 
@@ -21,6 +22,31 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [userData, setUserData] = useState<{ nim: string; alias: string } | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        setUserData({
+          nim: user.user_metadata?.nim || "-",
+          alias: user.user_metadata?.aliasName || "Anonim",
+        });
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
 
   const navigation = [
     { name: "Feed", href: "/feed", icon: Home },
@@ -38,11 +64,13 @@ export default function ProtectedLayout({
         {/* User Card */}
         <div className="neo-card bg-white p-4 flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange border-2 border-neo-black font-heading font-black text-neo-black shadow-neo-sm">
-            A
+            {userData?.alias.charAt(0).toUpperCase() || "U"}
           </div>
           <div className="min-w-0">
-            <h4 className="font-heading font-black text-sm text-neo-black truncate">adsda</h4>
-            <p className="text-[10px] font-bold text-neo-black/60">NIM: 1201422837</p>
+            <h4 className="font-heading font-black text-sm text-neo-black truncate">
+              {userData?.alias || "Memuat..."}
+            </h4>
+            <p className="text-[10px] font-bold text-neo-black/60">NIM: {userData?.nim || "-"}</p>
           </div>
         </div>
 
@@ -78,13 +106,13 @@ export default function ProtectedLayout({
         </div>
 
         {/* Log Out Button */}
-        <Link
-          href="/login"
-          className="neo-btn sky py-2.5 text-sm flex items-center justify-center gap-2"
+        <button
+          onClick={handleSignOut}
+          className="w-full neo-btn sky py-2.5 text-sm flex items-center justify-center gap-2 cursor-pointer"
         >
           <span>Keluar</span>
           <LogOut className="h-4 w-4" />
-        </Link>
+        </button>
 
         {/* Developer Info Card */}
         <div className="neo-card bg-white p-4 space-y-3 mt-auto text-[10px] leading-relaxed">
@@ -141,8 +169,10 @@ export default function ProtectedLayout({
               href="/profile"
               className="flex items-center gap-2 rounded-full border-2 border-neo-black bg-orange py-1 px-3 text-xs font-heading font-black shadow-neo-sm"
             >
-              <span className="h-5 w-5 bg-white border border-neo-black rounded-full flex items-center justify-center text-[10px]">A</span>
-              <span>adsda</span>
+              <span className="h-5 w-5 bg-white border border-neo-black rounded-full flex items-center justify-center text-[10px]">
+                {userData?.alias.charAt(0).toUpperCase() || "U"}
+              </span>
+              <span>{userData?.alias || "Memuat..."}</span>
             </Link>
           </div>
         </header>
@@ -179,3 +209,4 @@ export default function ProtectedLayout({
     </div>
   );
 }
+

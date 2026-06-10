@@ -1,27 +1,180 @@
+import { db } from "@/lib/prisma";
 import Link from "next/link";
 import React from "react";
 
-export default function Home() {
-  const mockupPosts = [
-    {
-      id: 1,
-      sender: "AnonKimia",
-      recipient: "Semua Anggota Lab Kimia Dasar",
-      content: "Siapa yang kemarin ninggalin jas lab basah di gantungan lemari belakang? Baunya asem banget tolong segera diambil sebelum didepak aslab 😭",
-      tag: "Akademik",
-      time: "15 menit yang lalu",
-      reactions: { fire: 5, laugh: 12, heart: 2 }
-    },
-    {
-      id: 2,
-      sender: "PencintaKucingSekaran",
-      recipient: "Pemberi Makan Kucing Kampus",
-      content: "Kucing oren gemuk yang biasanya nongkrong di depan FIP tadi kelihatan lemas banget di bawah pos satpam. Ada yang punya wet food atau vitamin kah buat dikasih?",
-      tag: "Sosial",
-      time: "1 jam yang lalu",
-      reactions: { fire: 1, laugh: 0, heart: 24 }
+
+interface ReactionButtonProps {
+  emoji: string;
+  count: number;
+}
+
+function ReactionButton({ emoji, count }: ReactionButtonProps) {
+  return (
+    <button
+      className="reaction-btn px-2.5 py-1 text-xs font-bold border-2 border-neo-black rounded-md shadow-neo-sm bg-white hover:translate-y-0 cursor-default"
+      disabled
+    >
+      {emoji} {count}
+    </button>
+  );
+}
+
+interface Post {
+  id: number;
+  sender: string;
+  recipient: string;
+  content: string;
+  tag: string;
+  createdAt: Date;
+  fire: number;
+  laugh: number;
+  heart: number;
+}
+
+interface PostCardProps {
+  post: Post;
+}
+
+function PostCard({ post }: PostCardProps) {
+  // Simple time ago calculation
+  const timeStr = "1 jam yang lalu"; // Fallback or computed from post.createdAt
+  
+  return (
+    <div className="neo-card !mb-0">
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full border-2 border-neo-black flex items-center justify-center text-lg font-bold bg-sky shrink-0">
+            {post.sender.charAt(0)}
+          </div>
+          <div>
+            <div className="font-extrabold text-sm text-neo-black">
+              {post.sender} ➡️ {post.recipient}
+            </div>
+            <div className="text-[10px] text-neo-black/50 font-semibold">{timeStr}</div>
+          </div>
+        </div>
+        <span className="neo-badge !bg-cream">#{post.tag}</span>
+      </div>
+      <p className="text-base font-semibold mb-4 text-neo-black">{post.content}</p>
+      
+      <div className="flex gap-3 border-t-2 border-neo-black pt-3">
+        <ReactionButton emoji="🔥" count={post.fire} />
+        <ReactionButton emoji="😂" count={post.laugh} />
+        <ReactionButton emoji="❤️" count={post.heart} />
+      </div>
+    </div>
+  );
+}
+
+export default async function Home() {
+  // Fetch posts from database, fall back to mockup data if empty or fails
+  let posts: Post[] = [];
+  try {
+    const dbPosts = await db.post.findMany({
+      include: {
+        author: true,
+        tag: true,
+        reactions: true,
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    
+    if (dbPosts.length > 0) {
+      posts = dbPosts.map(post => {
+        const fire = post.reactions.filter(r => r.emoji === "🔥").length;
+        const laugh = post.reactions.filter(r => r.emoji === "😂").length;
+        const heart = post.reactions.filter(r => r.emoji === "❤️").length;
+        return {
+          id: post.id,
+          sender: post.author.aliasName || "Anonim",
+          recipient: "Semua Anggota",
+          content: post.content,
+          tag: post.tag.name,
+          createdAt: post.createdAt,
+          fire,
+          laugh,
+          heart,
+        };
+      });
+    } else {
+      posts = [
+        {
+          id: 1,
+          sender: "AnonKimia",
+          recipient: "Semua Anggota Lab Kimia Dasar",
+          content: "Siapa yang kemarin ninggalin jas lab basah di gantungan lemari belakang? Baunya asem banget tolong segera diambil sebelum didepak aslab 😭",
+          tag: "Akademik",
+          createdAt: new Date(),
+          fire: 5,
+          laugh: 12,
+          heart: 2
+        },
+        {
+          id: 2,
+          sender: "PencintaKucingSekaran",
+          recipient: "Pemberi Makan Kucing Kampus",
+          content: "Kucing oren gemuk yang biasanya nongkrong di depan FIP tadi kelihatan lemas banget di bawah pos satpam. Ada yang punya wet food atau vitamin kah buat dikasih?",
+          tag: "Sosial",
+          createdAt: new Date(),
+          fire: 1,
+          laugh: 0,
+          heart: 24
+        }
+      ];
     }
-  ];
+  } catch (error) {
+    console.error("Database error fetching posts:", error);
+    // Fallback mockup data if database connection fails
+    posts = [
+      {
+        id: 1,
+        sender: "AnonKimia",
+        recipient: "Semua Anggota Lab Kimia Dasar",
+        content: "Siapa yang kemarin ninggalin jas lab basah di gantungan lemari belakang? Baunya asem banget tolong segera diambil sebelum didepak aslab 😭",
+        tag: "Akademik",
+        createdAt: new Date(),
+        fire: 5,
+        laugh: 12,
+        heart: 2
+      },
+      {
+        id: 2,
+        sender: "PencintaKucingSekaran",
+        recipient: "Pemberi Makan Kucing Kampus",
+        content: "Kucing oren gemuk yang biasanya nongkrong di depan FIP tadi kelihatan lemas banget di bawah pos satpam. Ada yang punya wet food atau vitamin kah buat dikasih?",
+        tag: "Sosial",
+        createdAt: new Date(),
+        fire: 1,
+        laugh: 0,
+        heart: 24
+      }
+    ];
+  }
+
+  // Fetch poll options from database, initialize if empty
+  let pollOptions = [];
+  try {
+    pollOptions = await db.pollOption.findMany();
+    if (pollOptions.length === 0) {
+      await db.pollOption.createMany({
+        data: [
+          { text: "Setiap hari (Geprek is life)", votes: 42 },
+          { text: "2-3 kali seminggu", votes: 48 },
+          { text: "Jarang / Tidak pernah", votes: 10 }
+        ]
+      });
+      pollOptions = await db.pollOption.findMany();
+    }
+  } catch (error) {
+    console.error("Database error fetching poll options:", error);
+    pollOptions = [
+      { id: 1, text: "Setiap hari (Geprek is life)", votes: 42 },
+      { id: 2, text: "2-3 kali seminggu", votes: 48 },
+      { id: 3, text: "Jarang / Tidak pernah", votes: 10 }
+    ];
+  }
+
+  const totalVotes = pollOptions.reduce((sum, opt) => sum + opt.votes, 0) || 1;
 
   return (
     <div className="flex flex-col min-h-screen bg-cream text-neo-black justify-between">
@@ -70,9 +223,9 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <div className="relative h-[240px] md:h-[300px] flex justify-center items-center mt-6 lg:mt-0">
+          <div className="relative w-full max-w-md mx-auto h-[280px] md:h-[320px] mt-6 lg:mt-0">
             {/* Floating Card 1 */}
-            <div className="neo-card w-[200px] md:w-[220px] absolute -rotate-6 z-10 shadow-neo hover:rotate-0 hover:scale-105 transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] !bg-orange !mb-0 !p-5 select-none">
+            <div className="neo-card absolute left-[5%] top-[10%] w-[180px] sm:w-[200px] md:w-[220px] -rotate-6 z-10 shadow-neo hover:rotate-0 hover:scale-105 transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] !bg-orange !mb-0 !p-5 select-none">
               <div className="flex justify-between items-center mb-3">
                 <span className="neo-badge !bg-white">#Curhat</span>
                 <span className="text-[10px] text-neo-black/60 font-semibold">Just Now</span>
@@ -82,7 +235,7 @@ export default function Home() {
               </p>
             </div>
             {/* Floating Card 2 */}
-            <div className="neo-card w-[180px] md:w-[200px] absolute rotate-[8deg] translate-x-[40px] md:translate-x-[80px] translate-y-[20px] md:translate-y-[40px] z-0 shadow-neo hover:rotate-0 hover:scale-105 transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] !bg-sky !mb-0 !p-5 select-none">
+            <div className="neo-card absolute right-[5%] bottom-[10%] w-[160px] sm:w-[180px] md:w-[200px] rotate-[8deg] z-0 shadow-neo hover:rotate-0 hover:scale-105 transition-all duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] !bg-sky !mb-0 !p-5 select-none">
               <div className="flex justify-between items-center mb-3">
                 <span className="neo-badge !bg-orange">#Kantin</span>
                 <span className="text-[10px] text-neo-black/60 font-semibold">2m ago</span>
@@ -107,28 +260,8 @@ export default function Home() {
             <div>
               <h3 className="mb-4 uppercase text-lg font-heading font-black">💬 Cerita Mahasiswa</h3>
               <div className="flex flex-col gap-4">
-                {mockupPosts.map(post => (
-                  <div key={post.id} className="neo-card !mb-0">
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full border-2 border-neo-black flex items-center justify-center text-lg font-bold bg-sky shrink-0">
-                          {post.sender.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-extrabold text-sm text-neo-black">{post.sender} ➡️ {post.recipient}</div>
-                          <div className="text-[10px] text-neo-black/50 font-semibold">{post.time}</div>
-                        </div>
-                      </div>
-                      <span className="neo-badge !bg-cream">#{post.tag}</span>
-                    </div>
-                    <p className="text-base font-semibold mb-4 text-neo-black">{post.content}</p>
-                    
-                    <div className="flex gap-3 border-t-2 border-neo-black pt-3">
-                      <button className="px-2.5 py-1 text-xs font-bold border-2 border-neo-black rounded-md shadow-neo-sm bg-white hover:translate-y-0 cursor-default" disabled>🔥 {post.reactions.fire}</button>
-                      <button className="px-2.5 py-1 text-xs font-bold border-2 border-neo-black rounded-md shadow-neo-sm bg-white hover:translate-y-0 cursor-default" disabled>😂 {post.reactions.laugh}</button>
-                      <button className="px-2.5 py-1 text-xs font-bold border-2 border-neo-black rounded-md shadow-neo-sm bg-white hover:translate-y-0 cursor-default" disabled>❤️ {post.reactions.heart}</button>
-                    </div>
-                  </div>
+                {posts.map(post => (
+                  <PostCard key={post.id} post={post} />
                 ))}
               </div>
             </div>
@@ -142,27 +275,21 @@ export default function Home() {
                   Berapa kali kalian makan geprek dalam satu minggu?
                 </p>
                 <div className="flex flex-col gap-2">
-                  <div className="bg-white border-2 border-neo-black rounded-md p-3 relative overflow-hidden transition-all duration-150">
-                    <div className="absolute top-0 left-0 bottom-0 w-[42%] bg-orange/35 z-0"></div>
-                    <div className="relative z-10 flex justify-between font-bold text-xs">
-                      <span>Setiap hari (Geprek is life)</span>
-                      <span className="text-blue">42%</span>
-                    </div>
-                  </div>
-                  <div className="bg-white border-2 border-neo-black rounded-md p-3 relative overflow-hidden transition-all duration-150">
-                    <div className="absolute top-0 left-0 bottom-0 w-[48%] bg-orange/35 z-0"></div>
-                    <div className="relative z-10 flex justify-between font-bold text-xs">
-                      <span>2-3 kali seminggu</span>
-                      <span className="text-blue">48%</span>
-                    </div>
-                  </div>
-                  <div className="bg-white border-2 border-neo-black rounded-md p-3 relative overflow-hidden transition-all duration-150">
-                    <div className="absolute top-0 left-0 bottom-0 w-[10%] bg-orange/35 z-0"></div>
-                    <div className="relative z-10 flex justify-between font-bold text-xs">
-                      <span>Jarang / Tidak pernah</span>
-                      <span className="text-blue">10%</span>
-                    </div>
-                  </div>
+                  {pollOptions.map(opt => {
+                    const percentage = Math.round((opt.votes / totalVotes) * 100);
+                    return (
+                      <div key={opt.id} className="bg-white border-2 border-neo-black rounded-md p-3 relative overflow-hidden transition-all duration-150">
+                        <div 
+                          className="absolute top-0 left-0 bottom-0 bg-[#FFD494] z-0"
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                        <div className="relative z-10 flex justify-between font-bold text-xs">
+                          <span>{opt.text}</span>
+                          <span className="text-blue">{percentage}%</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -189,3 +316,4 @@ export default function Home() {
     </div>
   );
 }
+

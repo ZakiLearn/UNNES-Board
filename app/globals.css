@@ -78,6 +78,15 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: none;
 }
 
+.neo-btn:disabled,
+.reaction-btn:disabled {
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  opacity: 0.6;
+}
+
+
 .neo-btn.blue {
   background-color: #2E5AA7;
   color: #ffffff;

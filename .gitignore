@@ -45,3 +45,7 @@ _bmad/
 _bmad-output/
 .agent/
 .agents/
+
+# md file
+AGENTS.md
+CLAUDE.md

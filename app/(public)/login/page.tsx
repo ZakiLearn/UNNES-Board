@@ -1,7 +1,15 @@
+'use client';
+
 import Link from "next/link";
-import React from "react";
+import React, { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
+import { login } from "@/app/auth/actions";
 
 export default function LoginPage() {
+  const [state, formAction, isPending] = useActionState(login, null);
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -14,12 +22,27 @@ export default function LoginPage() {
         </p>
       </div>
 
+      {message && (
+        <div className="p-3 border-2 border-neo-black bg-mint rounded-md text-xs font-bold text-neo-black">
+          {message}
+        </div>
+      )}
+
+      {state?.error && (
+        <div className="p-3 border-2 border-neo-black bg-orange rounded-md text-xs font-bold text-neo-black">
+          {state.error}
+        </div>
+      )}
+
       {/* Form */}
-      <form className="space-y-4">
+      <form action={formAction} className="space-y-4">
         <div className="form-group">
-          <label className="form-label">Email Kampus / NIM</label>
+          <label className="form-label" htmlFor="email">Email Kampus</label>
           <input
-            type="text"
+            id="email"
+            name="email"
+            type="email"
+            required
             placeholder="nim@students.unnes.ac.id"
             className="form-control"
           />
@@ -27,13 +50,16 @@ export default function LoginPage() {
 
         <div className="form-group">
           <div className="flex items-center justify-between mb-2">
-            <label className="form-label mb-0">Kata Sandi</label>
+            <label className="form-label mb-0" htmlFor="password">Kata Sandi</label>
             <a href="#" className="text-xs font-heading font-black text-blue hover:underline">
               Lupa sandi?
             </a>
           </div>
           <input
+            id="password"
+            name="password"
             type="password"
+            required
             placeholder="••••••••"
             className="form-control"
           />
@@ -41,9 +67,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full neo-btn"
+          disabled={isPending}
+          className="w-full neo-btn disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Masuk ke Akun
+          {isPending ? "Memuat..." : "Masuk ke Akun"}
         </button>
       </form>
 
@@ -69,3 +96,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

@@ -1,0 +1,100 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Identitas Pengguna
+model Profile {
+  id          String       @id // ID dari Supabase Auth (UUID)
+  aliasName   String?      @unique // Alias anonim permanen (misal: "Anon-1298")
+  hasSetAlias Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+
+
+  
+  posts       Post[]
+  comments    Comment[]
+  reactions   Reaction[]
+  pollVotes   PollVote[]
+}
+
+// 2. Kategori Postingan
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique // "Akademik", "Sosial", "Curhat", "Kantin"
+  posts Post[]
+}
+
+// 3. Postingan Utama
+model Post {
+  id          Int        @id @default(autoincrement())
+  content     String
+  createdAt   DateTime   @default(now())
+  
+  authorId    String
+  author      Profile    @relation(fields: [authorId], references: [id])
+  
+  tagId       Int
+  tag         Tag        @relation(fields: [tagId], references: [id])
+  
+  comments    Comment[]
+  reactions   Reaction[]
+}
+
+// 4. Komentar Postingan
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  authorId  String
+  author    Profile  @relation(fields: [authorId], references: [id])
+
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+// 5. Reaksi Anti-Spam
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  emoji     String   // "🔥", "😂", "❤️"
+  createdAt DateTime @default(now())
+
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id])
+
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, postId, emoji])
+}
+
+// 6. Polling (Tes Ombak)
+model Poll {
+  id        Int          @id @default(autoincrement())
+  question  String
+  createdAt DateTime     @default(now())
+  options   PollOption[]
+}
+
+model PollOption {
+  id      Int        @id @default(autoincrement())
+  text    String
+  pollId  Int
+  poll    Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes   PollVote[]
+}
+
+model PollVote {
+  id        Int        @id @default(autoincrement())
+  profileId String
+  profile   Profile    @relation(fields: [profileId], references: [id])
+  optionId  Int
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, optionId])
+}
