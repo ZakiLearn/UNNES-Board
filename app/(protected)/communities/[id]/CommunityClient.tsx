@@ -18,6 +18,7 @@ import {
   Loader2
 } from "lucide-react";
 import { sendMessage, delegateModerator } from "./actions";
+import { createClient } from "@/lib/supabase/client";
 
 interface MessageItem {
   id: number;
@@ -76,11 +77,40 @@ export default function CommunityClient({
   const [isPending, startTransition] = useTransition();
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<any>(null);
 
   // Sync initial messages from props when server revalidates
   useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
+
+  // Subscribe to Supabase Realtime Broadcast Channel
+  useEffect(() => {
+    const supabase = createClient();
+    
+    // Unique channel for this community and room
+    const channelName = `community-${community.id}-${activeRoom}`;
+    const channel = supabase.channel(channelName, {
+      config: {
+        broadcast: { self: false },
+      },
+    });
+
+    channel
+      .on("broadcast", { event: "message" }, ({ payload }) => {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === payload.id)) return prev;
+          return [...prev, payload];
+        });
+      })
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [community.id, activeRoom]);
 
   // Scroll to bottom of chat area when messages or active room changes
   useEffect(() => {
@@ -95,8 +125,9 @@ export default function CommunityClient({
     setChatInput("");
 
     // Optimistic update
+    const tempMessageId = Date.now();
     const tempMessage: MessageItem = {
-      id: Date.now(),
+      id: tempMessageId,
       content,
       roomName: activeRoom,
       createdAt: new Date().toISOString(),
@@ -109,12 +140,41 @@ export default function CommunityClient({
 
     startTransition(async () => {
       const res = await sendMessage(community.id, activeRoom, content);
-      if (res.success) {
-        router.refresh();
+      if (res.success && res.data) {
+        const dbMsg = res.data;
+        const finalMessage: MessageItem = {
+          id: dbMsg.id,
+          content: dbMsg.content,
+          roomName: dbMsg.roomName,
+          createdAt: new Date(dbMsg.createdAt).toISOString(),
+          profileId: dbMsg.profileId,
+          aliasName: activeProfile.fullName,
+          isMe: true
+        };
+
+        // Replace temp message with server saved message
+        setMessages(prev => prev.map(m => m.id === tempMessageId ? finalMessage : m));
+
+        // Broadcast to other users in the channel
+        if (channelRef.current) {
+          channelRef.current.send({
+            type: "broadcast",
+            event: "message",
+            payload: {
+              id: dbMsg.id,
+              content: dbMsg.content,
+              roomName: dbMsg.roomName,
+              createdAt: new Date(dbMsg.createdAt).toISOString(),
+              profileId: dbMsg.profileId,
+              aliasName: activeProfile.fullName,
+              isMe: false
+            }
+          });
+        }
       } else {
         alert(res.error || "Gagal mengirim pesan");
         // Remove optimistic message on failure
-        setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
+        setMessages(prev => prev.filter(m => m.id !== tempMessageId));
       }
     });
   };
