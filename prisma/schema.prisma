@@ -1,6 +1,7 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -8,10 +9,17 @@ generator client {
 }
 
 // 1. Identitas Pengguna
+enum Role {
+  ADMIN
+  MODERATOR
+  USER
+}
+
 model Profile {
   id          String       @id // ID dari Supabase Auth (UUID)
   aliasName   String?      @unique // Alias anonim permanen (misal: "Anon-1298")
   hasSetAlias Boolean      @default(false)
+  role        Role         @default(USER)
   createdAt   DateTime     @default(now())
 
 
@@ -20,6 +28,8 @@ model Profile {
   comments    Comment[]
   reactions   Reaction[]
   pollVotes   PollVote[]
+  communities CommunityMember[]
+  messages    CommunityMessage[]
 }
 
 // 2. Kategori Postingan
@@ -98,3 +108,51 @@ model PollVote {
 
   @@unique([profileId, optionId])
 }
+
+// 7. Komunitas (Communities)
+enum MembershipStatus {
+  PENDING
+  APPROVED
+}
+
+enum CommunityRole {
+  MODERATOR
+  MEMBER
+}
+
+model Community {
+  id          Int                @id @default(autoincrement())
+  name        String             @unique
+  description String
+  createdAt   DateTime           @default(now())
+  members     CommunityMember[]
+  messages    CommunityMessage[]
+}
+
+model CommunityMember {
+  id          Int              @id @default(autoincrement())
+  profileId   String
+  profile     Profile          @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  communityId Int
+  community   Community        @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  status      MembershipStatus @default(PENDING)
+  role        CommunityRole    @default(MEMBER)
+  alasan      String?          // Alasan pengajuan bergabung
+  createdAt   DateTime         @default(now())
+
+  @@unique([profileId, communityId])
+}
+
+model CommunityMessage {
+  id          Int       @id @default(autoincrement())
+  content     String
+  roomName    String    // misal: "pengumuman", "chat-kasual"
+  createdAt   DateTime  @default(now())
+  
+  profileId   String
+  profile     Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  communityId Int
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+}
+

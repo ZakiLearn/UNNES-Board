@@ -51,6 +51,7 @@ export default function ProtectedLayout({
   const navigation = [
     { name: "Feed", href: "/feed", icon: Home },
     { name: "Explore", href: "/explore", icon: Search },
+    { name: "Komunitas", href: "/communities", icon: Users },
     { name: "Messages", href: "/messages", icon: MessageSquare },
     { name: "Marketplace", href: "/marketplace", icon: ShoppingCart },
     { name: "Notifications", href: "/notifications", icon: Bell },

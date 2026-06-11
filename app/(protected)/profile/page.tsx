@@ -24,6 +24,14 @@ export default async function ProfilePage() {
   const name = user.user_metadata?.full_name || "Nama Lengkap";
   const nim = user.user_metadata?.nim || "-";
   const aliasName = profile?.aliasName || "Belum diatur";
+  const role = profile?.role || "USER";
+
+  const roleConfig = {
+    ADMIN: { label: "Admin", colorClass: "!bg-orange" },
+    MODERATOR: { label: "Moderator", colorClass: "!bg-mint" },
+    USER: { label: "Mahasiswa", colorClass: "!bg-sky" },
+  };
+  const currentRole = roleConfig[role as keyof typeof roleConfig] || roleConfig.USER;
 
   const userStats = [
     { label: "Postingan", value: postCount.toString(), color: "bg-orange" },
@@ -44,10 +52,15 @@ export default async function ProfilePage() {
             <div className="h-28 w-28 rounded-full border-4 border-neo-black bg-cream flex items-center justify-center text-5xl font-heading font-black shadow-neo-sm shrink-0">
               {aliasName.charAt(0).toUpperCase()}
             </div>
-            <div className="space-y-1 pb-1">
-              <h2 className="text-3xl font-heading font-black text-neo-black">
-                {name} ({aliasName})
-              </h2>
+            <div className="space-y-2 pb-1">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2">
+                <h2 className="text-3xl font-heading font-black text-neo-black">
+                  {name} ({aliasName})
+                </h2>
+                <span className={`neo-badge ${currentRole.colorClass} text-neo-black uppercase tracking-wider text-[10px]`}>
+                  {currentRole.label}
+                </span>
+              </div>
               <p className="text-sm font-heading font-extrabold text-neo-black/60">
                 Mahasiswa UNNES • NIM. {nim} • {user.email}
               </p>
