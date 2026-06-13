@@ -1,10 +1,20 @@
-import { RootLayout } from '@payloadcms/next/layouts'
+import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import config from '@/payload/config'
 import { importMap } from '@/payload/importMap'
 import React from 'react'
+import type { ServerFunctionClient } from 'payload'
 
 type Args = {
   children: React.ReactNode
+}
+
+const serverFunction: ServerFunctionClient = async function (args) {
+  'use server'
+  return handleServerFunctions({
+    ...args,
+    config,
+    importMap,
+  })
 }
 
 const Layout = ({ children }: Args) =>
@@ -12,6 +22,8 @@ const Layout = ({ children }: Args) =>
     children,
     config,
     importMap,
+    serverFunction,
   })
 
 export default Layout
+

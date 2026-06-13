@@ -18,17 +18,15 @@ export const generateMetadata = ({ params, searchParams }: Args) =>
     searchParams,
   })
 
-const Page = async ({ params, searchParams }: Args) => {
-  const resolvedParams = await params
-  const resolvedSearchParams = await searchParams
-
+const Page = ({ params, searchParams }: Args) => {
   return RootPage({
     config,
-    params: resolvedParams,
-    searchParams: resolvedSearchParams,
+    params,
+    searchParams,
     importMap,
   })
 }
 
 export default Page
+
 
