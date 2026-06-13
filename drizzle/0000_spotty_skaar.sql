@@ -1,5 +1,6 @@
 CREATE TYPE "public"."community_role" AS ENUM('MODERATOR', 'MEMBER');--> statement-breakpoint
 CREATE TYPE "public"."connection_status" AS ENUM('PENDING', 'ACCEPTED', 'REJECTED');--> statement-breakpoint
+CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'moderator', 'user');--> statement-breakpoint
 CREATE TYPE "public"."membership_status" AS ENUM('PENDING', 'APPROVED');--> statement-breakpoint
 CREATE TYPE "public"."role" AS ENUM('ADMIN', 'MODERATOR', 'USER');--> statement-breakpoint
 CREATE TABLE "chat_connection" (

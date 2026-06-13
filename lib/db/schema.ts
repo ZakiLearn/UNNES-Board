@@ -6,6 +6,7 @@ export const roleEnum = pgEnum('role', ['ADMIN', 'MODERATOR', 'USER'])
 export const membershipStatusEnum = pgEnum('membership_status', ['PENDING', 'APPROVED'])
 export const communityRoleEnum = pgEnum('community_role', ['MODERATOR', 'MEMBER'])
 export const connectionStatusEnum = pgEnum('connection_status', ['PENDING', 'ACCEPTED', 'REJECTED'])
+export const enumUsersRole = pgEnum('enum_users_role', ['admin', 'moderator', 'user'])
 
 // Tables
 export const profile = pgTable('profile', {

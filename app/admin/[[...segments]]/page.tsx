@@ -1,6 +1,8 @@
 import { RootPage, generatePageMetadata } from '@payloadcms/next/views'
-import config from '@/payload/config'
+import config from '@payload-config'
 import { importMap } from '@/payload/importMap'
+
+export const dynamic = 'force-dynamic'
 
 type Args = {
   params: Promise<{
@@ -19,12 +21,14 @@ export const generateMetadata = ({ params, searchParams }: Args) =>
   })
 
 const Page = ({ params, searchParams }: Args) => {
-  return RootPage({
-    config,
-    params,
-    searchParams,
-    importMap,
-  })
+  return (
+    <RootPage
+      config={config}
+      params={params}
+      searchParams={searchParams}
+      importMap={importMap}
+    />
+  )
 }
 
 export default Page

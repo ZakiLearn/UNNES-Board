@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 export const News: CollectionConfig = {
-  slug: 'news',
+  slug: 'cms_news',
   admin: {
     useAsTitle: 'title',
     group: 'Updates',

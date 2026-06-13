@@ -14,7 +14,7 @@ export async function getPayloadInstance() {
 export async function getEvents() {
   const payload = await getPayloadInstance()
   const result = await payload.find({
-    collection: 'events',
+    collection: 'cms_events',
     where: {
       status: {
         equals: 'published',
@@ -31,7 +31,7 @@ export async function getEvents() {
 export async function getNews() {
   const payload = await getPayloadInstance()
   const result = await payload.find({
-    collection: 'news',
+    collection: 'cms_news',
     where: {
       status: {
         equals: 'published',
@@ -48,7 +48,7 @@ export async function getNews() {
 export async function getArticles() {
   const payload = await getPayloadInstance()
   const result = await payload.find({
-    collection: 'articles',
+    collection: 'cms_articles',
     where: {
       status: {
         equals: 'published',

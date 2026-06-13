@@ -7,4 +7,12 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
+  tablesFilter: [
+    '*',
+    '!users',
+    '!users_sessions',
+    '!media',
+    '!payload_*',
+    '!cms_*',
+  ],
 })
