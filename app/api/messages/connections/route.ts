@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { chatConnection as chatConnectionTable } from "@/lib/db/schema";
+import { eq, and, or } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 
 // GET: Fetch accepted connections and pending requests
@@ -15,31 +17,32 @@ export async function GET() {
     }
 
     // 1. Get accepted chat connections
-    const acceptedConnections = await db.chatConnection.findMany({
-      where: {
-        OR: [
-          { senderId: user.id, status: "ACCEPTED" },
-          { receiverId: user.id, status: "ACCEPTED" },
-        ],
-      },
-      include: {
+    const acceptedConnections = await db.query.chatConnection.findMany({
+      where: and(
+        or(
+          eq(chatConnectionTable.senderId, user.id),
+          eq(chatConnectionTable.receiverId, user.id)
+        ),
+        eq(chatConnectionTable.status, "ACCEPTED")
+      ),
+      with: {
         sender: {
-          select: {
+          columns: {
             id: true,
             aliasName: true,
-          },
+          }
         },
         receiver: {
-          select: {
+          columns: {
             id: true,
             aliasName: true,
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     // Format connections to easily access the target profile
-    const activeChats = acceptedConnections.map((conn) => {
+    const activeChats = acceptedConnections.map((conn: any) => {
       const counterpart = conn.senderId === user.id ? conn.receiver : conn.sender;
       return {
         connectionId: conn.id,
@@ -48,24 +51,24 @@ export async function GET() {
     });
 
     // 2. Get pending received connection requests
-    const pendingRequests = await db.chatConnection.findMany({
-      where: {
-        receiverId: user.id,
-        status: "PENDING",
-      },
-      include: {
+    const pendingRequests = await db.query.chatConnection.findMany({
+      where: and(
+        eq(chatConnectionTable.receiverId, user.id),
+        eq(chatConnectionTable.status, "PENDING")
+      ),
+      with: {
         sender: {
-          select: {
+          columns: {
             id: true,
             aliasName: true,
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     return NextResponse.json({
       activeChats,
-      pendingRequests: pendingRequests.map(r => ({
+      pendingRequests: pendingRequests.map((r: any) => ({
         connectionId: r.id,
         sender: r.sender,
         createdAt: r.createdAt,
@@ -102,14 +105,14 @@ export async function POST(request: Request) {
       }
 
       // Check if connection already exists
-      const existing = await db.chatConnection.findFirst({
-        where: {
-          OR: [
-            { senderId: user.id, receiverId },
-            { senderId: receiverId, receiverId: user.id },
-          ],
-        },
-      });
+      const existingList = await db.select().from(chatConnectionTable).where(
+        or(
+          and(eq(chatConnectionTable.senderId, user.id), eq(chatConnectionTable.receiverId, receiverId)),
+          and(eq(chatConnectionTable.senderId, receiverId), eq(chatConnectionTable.receiverId, user.id))
+        )
+      ).limit(1);
+
+      const existing = existingList[0];
 
       if (existing) {
         return NextResponse.json({
@@ -119,13 +122,11 @@ export async function POST(request: Request) {
       }
 
       // Create new connection request
-      const newConnection = await db.chatConnection.create({
-        data: {
-          senderId: user.id,
-          receiverId,
-          status: "PENDING",
-        },
-      });
+      const [newConnection] = await db.insert(chatConnectionTable).values({
+        senderId: user.id,
+        receiverId,
+        status: "PENDING",
+      }).returning();
 
       return NextResponse.json({
         message: "Connection request sent",
@@ -140,9 +141,11 @@ export async function POST(request: Request) {
       }
 
       // Verify the connection belongs to the user (only the receiver can accept/reject)
-      const conn = await db.chatConnection.findUnique({
-        where: { id: connectionId },
-      });
+      const connList = await db.select().from(chatConnectionTable).where(
+        eq(chatConnectionTable.id, connectionId)
+      ).limit(1);
+
+      const conn = connList[0];
 
       if (!conn) {
         return NextResponse.json({ error: "Connection not found" }, { status: 404 });
@@ -153,16 +156,14 @@ export async function POST(request: Request) {
       }
 
       if (status === "REJECTED") {
-        await db.chatConnection.delete({
-          where: { id: connectionId },
-        });
+        await db.delete(chatConnectionTable).where(eq(chatConnectionTable.id, connectionId));
         return NextResponse.json({ message: "Request rejected and deleted" });
       }
 
-      const updated = await db.chatConnection.update({
-        where: { id: connectionId },
-        data: { status: "ACCEPTED" },
-      });
+      const [updated] = await db.update(chatConnectionTable)
+        .set({ status: "ACCEPTED" })
+        .where(eq(chatConnectionTable.id, connectionId))
+        .returning();
 
       return NextResponse.json({
         message: "Connection request accepted",

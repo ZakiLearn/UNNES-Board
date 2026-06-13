@@ -1,5 +1,5 @@
 import React from "react";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import FeedClient from "./FeedClient";
 
@@ -18,72 +18,66 @@ export default async function FeedPage() {
   }
 
   // 1. Fetch tags
-  const tags = await db.tag.findMany({
-    orderBy: { name: "asc" }
+  const tags = await db.query.tag.findMany({
+    orderBy: (t, { asc }) => [asc(t.name)]
   });
   const tagsList = tags.length > 0 ? tags.map(t => t.name) : ["Akademik", "Sosial", "Curhat", "Kantin"];
 
   // 2. Fetch posts
-  const posts = await db.post.findMany({
-    include: {
+  const posts = await db.query.post.findMany({
+    with: {
       author: {
-        select: {
+        columns: {
           aliasName: true
         }
       },
       tag: {
-        select: {
+        columns: {
           id: true,
           name: true
         }
       },
       comments: {
-        include: {
+        with: {
           author: {
-            select: {
+            columns: {
               aliasName: true
             }
           }
         },
-        orderBy: {
-          createdAt: "asc"
-        }
+        orderBy: (c, { asc }) => [asc(c.createdAt)]
       },
       reactions: {
-        select: {
+        columns: {
           id: true,
           emoji: true,
           profileId: true
         }
       }
     },
-    orderBy: {
-      createdAt: "desc"
-    }
+    orderBy: (p, { desc }) => [desc(p.createdAt)]
   });
 
   // 3. Fetch latest poll
-  const poll = await db.poll.findFirst({
-    include: {
+  const poll = await db.query.poll.findFirst({
+    with: {
       options: {
-        include: {
+        with: {
           votes: {
-            select: {
+            columns: {
               profileId: true
             }
           }
         }
       }
     },
-    orderBy: {
-      createdAt: "desc"
-    }
+    orderBy: (p, { desc }) => [desc(p.createdAt)]
   });
 
   return (
     <FeedClient 
-      initialPosts={posts} 
-      initialPoll={poll} 
+      initialPosts={posts as any} 
+      initialPoll={poll as any} 
       currentUserId={user.id}
       tagsList={tagsList}
     />

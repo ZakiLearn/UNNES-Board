@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { profile as profileTable, chatConnection as chatConnectionTable } from "@/lib/db/schema";
+import { eq, and, or, ilike, ne } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -21,38 +23,34 @@ export async function GET(request: Request) {
     }
 
     // Search profiles by aliasName (excluding current user)
-    const profiles = await db.profile.findMany({
-      where: {
-        aliasName: {
-          contains: query,
-          mode: "insensitive",
-        },
-        id: {
-          not: user.id,
-        },
-      },
-      select: {
-        id: true,
-        aliasName: true,
-      },
-      take: 10,
-    });
+    const profiles = await db.select({
+      id: profileTable.id,
+      aliasName: profileTable.aliasName,
+    })
+    .from(profileTable)
+    .where(
+      and(
+        ilike(profileTable.aliasName, `%${query}%`),
+        ne(profileTable.id, user.id)
+      )
+    )
+    .limit(10);
 
     // For each profile found, fetch connection status
     const usersWithStatus = await Promise.all(
-      profiles.map(async (profile) => {
-        const conn = await db.chatConnection.findFirst({
-          where: {
-            OR: [
-              { senderId: user.id, receiverId: profile.id },
-              { senderId: profile.id, receiverId: user.id },
-            ],
-          },
-        });
+      profiles.map(async (p) => {
+        const connList = await db.select().from(chatConnectionTable).where(
+          or(
+            and(eq(chatConnectionTable.senderId, user.id), eq(chatConnectionTable.receiverId, p.id)),
+            and(eq(chatConnectionTable.senderId, p.id), eq(chatConnectionTable.receiverId, user.id))
+          )
+        ).limit(1);
+
+        const conn = connList[0];
 
         return {
-          id: profile.id,
-          aliasName: profile.aliasName,
+          id: p.id,
+          aliasName: p.aliasName,
           connection: conn
             ? {
                 id: conn.id,

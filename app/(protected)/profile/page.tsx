@@ -1,6 +1,8 @@
 import React from "react";
 import { createClient } from "@/lib/supabase/server";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { profile as profileTable, post as postTable } from "@/lib/db/schema";
+import { eq, count } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 export default async function ProfilePage() {
@@ -13,13 +15,11 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  const profile = await db.profile.findUnique({
-    where: { id: user.id },
-  });
+  const profileList = await db.select().from(profileTable).where(eq(profileTable.id, user.id)).limit(1);
+  const profile = profileList[0];
 
-  const postCount = await db.post.count({
-    where: { authorId: user.id },
-  });
+  const countRes = await db.select({ value: count() }).from(postTable).where(eq(postTable.authorId, user.id));
+  const postCount = countRes[0]?.value || 0;
 
   const name = user.user_metadata?.full_name || "Nama Lengkap";
   const nim = user.user_metadata?.nim || "-";
@@ -116,4 +116,3 @@ export default async function ProfilePage() {
     </div>
   );
 }
-

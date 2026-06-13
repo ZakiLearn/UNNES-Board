@@ -1,7 +1,7 @@
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { poll as pollTable, pollOption as pollOptionTable } from "@/lib/db/schema";
 import Link from "next/link";
 import React from "react";
-
 
 interface ReactionButtonProps {
   emoji: string;
@@ -70,13 +70,21 @@ export default async function Home() {
   // Fetch posts from database, fall back to mockup data if empty or fails
   let posts: Post[] = [];
   try {
-    const dbPosts = await db.post.findMany({
-      include: {
-        author: true,
-        tag: true,
-        reactions: true,
+    const dbPosts = await db.query.post.findMany({
+      with: {
+        author: {
+          columns: {
+            aliasName: true
+          }
+        },
+        tag: {
+          columns: {
+            name: true
+          }
+        },
+        reactions: true
       },
-      orderBy: { createdAt: "desc" }
+      orderBy: (p, { desc }) => [desc(p.createdAt)]
     });
     
     if (dbPosts.length > 0) {
@@ -124,7 +132,6 @@ export default async function Home() {
     }
   } catch (error) {
     console.error("Database error fetching posts:", error);
-    // Fallback mockup data if database connection fails
     posts = [
       {
         id: 1,
@@ -154,47 +161,47 @@ export default async function Home() {
   // Fetch poll options from database, initialize if empty
   let pollOptions: { id: number; text: string; votes: number }[] = [];
   try {
-    let poll = await db.poll.findFirst({
-      include: {
+    let poll = await db.query.poll.findFirst({
+      with: {
         options: {
-          include: {
-            _count: {
-              select: { votes: true }
-            }
-          }
-        }
-      },
-      orderBy: { createdAt: "desc" }
-    });
-
-    if (!poll) {
-      poll = await db.poll.create({
-        data: {
-          question: "Berapa kali kalian makan geprek dalam satu minggu?",
-          options: {
-            create: [
-              { text: "Setiap hari (Geprek is life)" },
-              { text: "2-3 kali seminggu" },
-              { text: "Jarang / Tidak pernah" }
-            ]
-          }
-        },
-        include: {
-          options: {
-            include: {
-              _count: {
-                select: { votes: true }
+          with: {
+            votes: {
+              columns: {
+                id: true
               }
             }
           }
         }
+      },
+      orderBy: (p, { desc }) => [desc(p.createdAt)]
+    });
+ 
+    if (!poll) {
+      poll = await db.transaction(async (tx) => {
+        const [newPoll] = await tx.insert(pollTable).values({
+          question: "Berapa kali kalian makan geprek dalam satu minggu?"
+        }).returning();
+
+        const insertedOptions = await tx.insert(pollOptionTable).values([
+          { text: "Setiap hari (Geprek is life)", pollId: newPoll.id },
+          { text: "2-3 kali seminggu", pollId: newPoll.id },
+          { text: "Jarang / Tidak pernah", pollId: newPoll.id }
+        ]).returning();
+
+        return {
+          ...newPoll,
+          options: insertedOptions.map(opt => ({
+            ...opt,
+            votes: []
+          }))
+        };
       });
     }
 
     pollOptions = poll.options.map(opt => ({
       id: opt.id,
       text: opt.text,
-      votes: opt._count.votes
+      votes: opt.votes.length
     }));
   } catch (error) {
     console.error("Database error fetching poll options:", error);
@@ -347,4 +354,3 @@ export default async function Home() {
     </div>
   );
 }
-

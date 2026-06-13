@@ -73,7 +73,8 @@ export async function signOut() {
   redirect('/login');
 }
 
-import { db } from '@/lib/prisma';
+import { db } from '@/lib/db';
+import { profile } from '@/lib/db/schema';
 
 export async function setPseudonym(prevState: any, formData: FormData) {
   const alias = formData.get('alias') as string;
@@ -94,18 +95,19 @@ export async function setPseudonym(prevState: any, formData: FormData) {
   }
 
   try {
-    await db.profile.upsert({
-      where: { id: user.id },
-      update: {
-        aliasName: alias.trim(),
-        hasSetAlias: true,
-      },
-      create: {
+    await db.insert(profile)
+      .values({
         id: user.id,
         aliasName: alias.trim(),
         hasSetAlias: true,
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: profile.id,
+        set: {
+          aliasName: alias.trim(),
+          hasSetAlias: true,
+        },
+      });
 
     await supabase.auth.updateUser({
       data: {
@@ -114,7 +116,7 @@ export async function setPseudonym(prevState: any, formData: FormData) {
       },
     });
   } catch (error: any) {
-    if (error.code === 'P2002') {
+    if (error.code === '23505') {
       return { error: 'Nama samaran ini sudah digunakan. Silakan cari nama samaran lain.' };
     }
     return { error: 'Gagal menyimpan nama samaran. Silakan coba lagi.' };

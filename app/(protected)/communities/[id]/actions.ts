@@ -1,7 +1,9 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/prisma';
+import { db } from '@/lib/db';
+import { profile as profileTable, communityMember as communityMemberTable, communityMessage as communityMessageTable } from '@/lib/db/schema';
+import { eq, and, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 // Helper to get authenticated user profile
@@ -13,9 +15,8 @@ async function getAuthenticatedProfile() {
     throw new Error('Sesi Anda telah berakhir. Silakan masuk kembali.');
   }
 
-  const profile = await db.profile.findUnique({
-    where: { id: user.id }
-  });
+  const existing = await db.select().from(profileTable).where(eq(profileTable.id, user.id)).limit(1);
+  const profile = existing[0];
 
   if (!profile) {
     throw new Error('Profil tidak ditemukan.');
@@ -30,14 +31,13 @@ export async function sendMessage(communityId: number, roomName: string, content
     const profile = await getAuthenticatedProfile();
 
     // Check membership status
-    const membership = await db.communityMember.findUnique({
-      where: {
-        profileId_communityId: {
-          profileId: profile.id,
-          communityId
-        }
-      }
-    });
+    const membershipList = await db.select().from(communityMemberTable).where(
+      and(
+        eq(communityMemberTable.profileId, profile.id),
+        eq(communityMemberTable.communityId, communityId)
+      )
+    ).limit(1);
+    const membership = membershipList[0];
 
     if (profile.role !== 'ADMIN' && (!membership || membership.status !== 'APPROVED')) {
       return { success: false, error: 'Akses ditolak. Anda bukan anggota resmi dari komunitas ini.' };
@@ -59,20 +59,20 @@ export async function sendMessage(communityId: number, roomName: string, content
     }
 
     // Save message to database
-    const message = await db.communityMessage.create({
-      data: {
-        content: content.trim(),
-        roomName: cleanRoomName,
-        profileId: profile.id,
-        communityId
-      },
-      include: {
-        profile: true
-      }
-    });
+    const [message] = await db.insert(communityMessageTable).values({
+      content: content.trim(),
+      roomName: cleanRoomName,
+      profileId: profile.id,
+      communityId
+    }).returning();
+
+    const msgWithProfile = {
+      ...message,
+      profile: profile
+    };
 
     revalidatePath(`/communities/${communityId}`);
-    return { success: true, data: message };
+    return { success: true, data: msgWithProfile };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
@@ -84,14 +84,13 @@ export async function delegateModerator(communityId: number, targetProfileId: st
     const profile = await getAuthenticatedProfile();
 
     // Check sender's authorization (must be MODERATOR in the community or ADMIN in profile)
-    const senderMembership = await db.communityMember.findUnique({
-      where: {
-        profileId_communityId: {
-          profileId: profile.id,
-          communityId
-        }
-      }
-    });
+    const senderMembershipList = await db.select().from(communityMemberTable).where(
+      and(
+        eq(communityMemberTable.profileId, profile.id),
+        eq(communityMemberTable.communityId, communityId)
+      )
+    ).limit(1);
+    const senderMembership = senderMembershipList[0];
 
     const isSenderAuthorized = profile.role === 'ADMIN' || senderMembership?.role === 'MODERATOR';
     if (!isSenderAuthorized) {
@@ -99,14 +98,13 @@ export async function delegateModerator(communityId: number, targetProfileId: st
     }
 
     // Check target's membership status (must be APPROVED)
-    const targetMembership = await db.communityMember.findUnique({
-      where: {
-        profileId_communityId: {
-          profileId: targetProfileId,
-          communityId
-        }
-      }
-    });
+    const targetMembershipList = await db.select().from(communityMemberTable).where(
+      and(
+        eq(communityMemberTable.profileId, targetProfileId),
+        eq(communityMemberTable.communityId, communityId)
+      )
+    ).limit(1);
+    const targetMembership = targetMembershipList[0];
 
     if (!targetMembership || targetMembership.status !== 'APPROVED') {
       return { success: false, error: 'Target pengguna belum menjadi anggota yang disetujui di komunitas ini.' };
@@ -117,30 +115,29 @@ export async function delegateModerator(communityId: number, targetProfileId: st
     }
 
     // Check current moderator count limit (max 3)
-    const modCount = await db.communityMember.count({
-      where: {
-        communityId,
-        role: 'MODERATOR',
-        status: 'APPROVED'
-      }
-    });
+    const countRes = await db.select({ value: count() }).from(communityMemberTable).where(
+      and(
+        eq(communityMemberTable.communityId, communityId),
+        eq(communityMemberTable.role, 'MODERATOR'),
+        eq(communityMemberTable.status, 'APPROVED')
+      )
+    );
+    const modCount = countRes[0]?.value || 0;
 
     if (modCount >= 3) {
       return { success: false, error: 'Jumlah moderator maksimal (3) telah tercapai.' };
     }
 
     // Update role
-    const updated = await db.communityMember.update({
-      where: {
-        profileId_communityId: {
-          profileId: targetProfileId,
-          communityId
-        }
-      },
-      data: {
-        role: 'MODERATOR'
-      }
-    });
+    const [updated] = await db.update(communityMemberTable)
+      .set({ role: 'MODERATOR' })
+      .where(
+        and(
+          eq(communityMemberTable.profileId, targetProfileId),
+          eq(communityMemberTable.communityId, communityId)
+        )
+      )
+      .returning();
 
     revalidatePath(`/communities/${communityId}`);
     return { success: true, data: updated };

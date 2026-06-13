@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { directMessage as directMessageTable, chatConnection as chatConnectionTable } from "@/lib/db/schema";
+import { eq, and, or, asc } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 
 // GET: Fetch message history with a specific user
@@ -21,17 +23,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const messages = await db.directMessage.findMany({
-      where: {
-        OR: [
-          { senderId: user.id, receiverId },
-          { senderId: receiverId, receiverId: user.id }
-        ]
-      },
-      orderBy: {
-        createdAt: "asc"
-      }
-    });
+    const messages = await db.select().from(directMessageTable).where(
+      or(
+        and(eq(directMessageTable.senderId, user.id), eq(directMessageTable.receiverId, receiverId)),
+        and(eq(directMessageTable.senderId, receiverId), eq(directMessageTable.receiverId, user.id))
+      )
+    ).orderBy(asc(directMessageTable.createdAt));
 
     return NextResponse.json({
       messages: messages.map(m => ({
@@ -68,26 +65,27 @@ export async function POST(request: Request) {
     }
 
     // Verify chat connection status (must be ACCEPTED to send messages)
-    const connection = await db.chatConnection.findFirst({
-      where: {
-        OR: [
-          { senderId: user.id, receiverId, status: "ACCEPTED" },
-          { senderId: receiverId, receiverId: user.id, status: "ACCEPTED" }
-        ]
-      }
-    });
+    const connectionList = await db.select().from(chatConnectionTable).where(
+      and(
+        or(
+          and(eq(chatConnectionTable.senderId, user.id), eq(chatConnectionTable.receiverId, receiverId)),
+          and(eq(chatConnectionTable.senderId, receiverId), eq(chatConnectionTable.receiverId, user.id))
+        ),
+        eq(chatConnectionTable.status, "ACCEPTED")
+      )
+    ).limit(1);
+
+    const connection = connectionList[0];
 
     if (!connection) {
       return NextResponse.json({ error: "No active chat connection found" }, { status: 403 });
     }
 
-    const message = await db.directMessage.create({
-      data: {
-        senderId: user.id,
-        receiverId,
-        content: content.trim()
-      }
-    });
+    const [message] = await db.insert(directMessageTable).values({
+      senderId: user.id,
+      receiverId,
+      content: content.trim()
+    }).returning();
 
     return NextResponse.json({
       message: {

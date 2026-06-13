@@ -1,7 +1,9 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/prisma';
+import { db } from '@/lib/db';
+import { profile as profileTable, tag as tagTable, post as postTable, comment as commentTable, reaction as reactionTable, poll as pollTable, pollOption as pollOptionTable, pollVote as pollVoteTable } from '@/lib/db/schema';
+import { eq, and, inArray, ilike } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 // Helper to get authenticated user profile
@@ -14,19 +16,17 @@ async function getAuthenticatedProfile() {
   }
 
   // Ensure profile exists in DB (fallback if onboarding was bypassed)
-  let profile = await db.profile.findUnique({
-    where: { id: user.id }
-  });
+  const existingProfiles = await db.select().from(profileTable).where(eq(profileTable.id, user.id)).limit(1);
+  let profile = existingProfiles[0];
 
   if (!profile) {
     const defaultAlias = `Anon-${Math.floor(1000 + Math.random() * 9000)}`;
-    profile = await db.profile.create({
-      data: {
-        id: user.id,
-        aliasName: defaultAlias,
-        hasSetAlias: false
-      }
-    });
+    const [newProfile] = await db.insert(profileTable).values({
+      id: user.id,
+      aliasName: defaultAlias,
+      hasSetAlias: false
+    }).returning();
+    profile = newProfile;
   }
 
   return profile;
@@ -50,22 +50,20 @@ export async function createMenfessPost(prevState: any, formData: FormData) {
     const cleanedTag = (rawTag || 'Curhat').replace('#', '').trim();
 
     // Find or create tag
-    let tagRecord = await db.tag.findFirst({
-      where: { name: { equals: cleanedTag, mode: 'insensitive' } }
-    });
+    let tagRecord;
+    const existingTags = await db.select().from(tagTable).where(ilike(tagTable.name, cleanedTag)).limit(1);
 
-    if (!tagRecord) {
-      tagRecord = await db.tag.create({
-        data: { name: cleanedTag }
-      });
+    if (existingTags.length > 0) {
+      tagRecord = existingTags[0];
+    } else {
+      const [newTag] = await db.insert(tagTable).values({ name: cleanedTag }).returning();
+      tagRecord = newTag;
     }
 
-    await db.post.create({
-      data: {
-        content: content.trim(),
-        authorId: profile.id,
-        tagId: tagRecord.id
-      }
+    await db.insert(postTable).values({
+      content: content.trim(),
+      authorId: profile.id,
+      tagId: tagRecord.id
     });
 
     revalidatePath('/feed');
@@ -80,27 +78,25 @@ export async function togglePostReaction(postId: number, emoji: string) {
   try {
     const profile = await getAuthenticatedProfile();
 
-    const existingReaction = await db.reaction.findFirst({
-      where: {
-        profileId: profile.id,
-        postId: postId,
-        emoji: emoji
-      }
-    });
+    const existingReactions = await db.select().from(reactionTable).where(
+      and(
+        eq(reactionTable.profileId, profile.id),
+        eq(reactionTable.postId, postId),
+        eq(reactionTable.emoji, emoji)
+      )
+    ).limit(1);
+
+    const existingReaction = existingReactions[0];
 
     if (existingReaction) {
       // Remove reaction
-      await db.reaction.delete({
-        where: { id: existingReaction.id }
-      });
+      await db.delete(reactionTable).where(eq(reactionTable.id, existingReaction.id));
     } else {
       // Add reaction
-      await db.reaction.create({
-        data: {
-          profileId: profile.id,
-          postId: postId,
-          emoji: emoji
-        }
+      await db.insert(reactionTable).values({
+        profileId: profile.id,
+        postId: postId,
+        emoji: emoji
       });
     }
 
@@ -120,12 +116,10 @@ export async function addPostComment(postId: number, content: string) {
       return { error: 'Komentar tidak boleh kosong.' };
     }
 
-    await db.comment.create({
-      data: {
-        content: content.trim(),
-        authorId: profile.id,
-        postId: postId
-      }
+    await db.insert(commentTable).values({
+      content: content.trim(),
+      authorId: profile.id,
+      postId: postId
     });
 
     revalidatePath('/feed');
@@ -141,46 +135,42 @@ export async function submitPollVote(optionId: number) {
     const profile = await getAuthenticatedProfile();
 
     // Find the option to check the pollId
-    const option = await db.pollOption.findUnique({
-      where: { id: optionId },
-      include: { poll: { include: { options: true } } }
-    });
+    const existingOptions = await db.select().from(pollOptionTable).where(eq(pollOptionTable.id, optionId)).limit(1);
+    const option = existingOptions[0];
 
     if (!option) {
       return { error: 'Pilihan polling tidak ditemukan.' };
     }
 
     // Get all options for this poll
-    const optionIds = option.poll.options.map(opt => opt.id);
+    const pollOptionsList = await db.select().from(pollOptionTable).where(eq(pollOptionTable.pollId, option.pollId));
+    const optionIds = pollOptionsList.map(opt => opt.id);
 
     // Check if the user has already voted on ANY option in this poll
-    const existingVote = await db.pollVote.findFirst({
-      where: {
-        profileId: profile.id,
-        optionId: { in: optionIds }
-      }
-    });
+    const existingVotesList = await db.select().from(pollVoteTable).where(
+      and(
+        eq(pollVoteTable.profileId, profile.id),
+        inArray(pollVoteTable.optionId, optionIds)
+      )
+    ).limit(1);
+
+    const existingVote = existingVotesList[0];
 
     if (existingVote) {
       if (existingVote.optionId === optionId) {
         // If clicking the same option, retract the vote
-        await db.pollVote.delete({
-          where: { id: existingVote.id }
-        });
+        await db.delete(pollVoteTable).where(eq(pollVoteTable.id, existingVote.id));
       } else {
         // Switch the vote to the new option
-        await db.pollVote.update({
-          where: { id: existingVote.id },
-          data: { optionId: optionId }
-        });
+        await db.update(pollVoteTable)
+          .set({ optionId: optionId })
+          .where(eq(pollVoteTable.id, existingVote.id));
       }
     } else {
       // Cast new vote
-      await db.pollVote.create({
-        data: {
-          profileId: profile.id,
-          optionId: optionId
-        }
+      await db.insert(pollVoteTable).values({
+        profileId: profile.id,
+        optionId: optionId
       });
     }
 

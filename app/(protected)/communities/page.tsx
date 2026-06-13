@@ -1,6 +1,8 @@
 import React from "react";
 import { createClient } from "@/lib/supabase/server";
-import { db } from "@/lib/prisma";
+import { db } from "@/lib/db";
+import { profile as profileTable, community as communityTable, communityMember as communityMemberTable } from "@/lib/db/schema";
+import { eq, and, sql, asc, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import CommunitiesClient from "./CommunitiesClient";
 
@@ -15,56 +17,41 @@ export default async function CommunitiesPage() {
   }
 
   // Fetch current user's profile
-  const profile = await db.profile.findUnique({
-    where: { id: user.id },
-  });
+  const profileList = await db.select().from(profileTable).where(eq(profileTable.id, user.id)).limit(1);
+  const profile = profileList[0];
 
   if (!profile) {
     redirect("/onboarding");
   }
 
   // Fetch all communities and include the count of approved members
-  const communities = await db.community.findMany({
-    include: {
-      _count: {
-        select: {
-          members: {
-            where: {
-              status: "APPROVED"
-            }
-          }
-        }
-      }
-    },
-    orderBy: {
-      createdAt: "desc"
-    }
-  });
+  const communitiesWithCounts = await db.select({
+    id: communityTable.id,
+    name: communityTable.name,
+    description: communityTable.description,
+    createdAt: communityTable.createdAt,
+    memberCount: sql<number>`cast(count(${communityMemberTable.id}) filter (where ${communityMemberTable.status} = 'APPROVED') as integer)`
+  })
+  .from(communityTable)
+  .leftJoin(communityMemberTable, eq(communityTable.id, communityMemberTable.communityId))
+  .groupBy(communityTable.id)
+  .orderBy(desc(communityTable.createdAt));
 
   // Fetch the current user's memberships
-  const myMemberships = await db.communityMember.findMany({
-    where: {
-      profileId: user.id
-    }
-  });
+  const myMemberships = await db.select().from(communityMemberTable).where(eq(communityMemberTable.profileId, user.id));
 
   // Fetch all profiles to populate the dropdown for selecting initial moderator (for ADMINs)
-  const allProfiles = await db.profile.findMany({
-    select: {
-      id: true,
-      aliasName: true
-    },
-    orderBy: {
-      aliasName: "asc"
-    }
-  });
+  const allProfiles = await db.select({
+    id: profileTable.id,
+    aliasName: profileTable.aliasName
+  }).from(profileTable).orderBy(asc(profileTable.aliasName));
 
   // Map the structures to simple serialization-safe formats
-  const serializedCommunities = communities.map(c => ({
+  const serializedCommunities = communitiesWithCounts.map(c => ({
     id: c.id,
     name: c.name,
     description: c.description,
-    memberCount: c._count.members,
+    memberCount: c.memberCount || 0,
     createdAt: c.createdAt.toISOString()
   }));
 
