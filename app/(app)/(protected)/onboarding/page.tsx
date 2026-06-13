@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useActionState } from 'react';
-import { setPseudonym } from '@/app/auth/actions';
+import { setPseudonym } from '@/app/(app)/auth/actions';
 
 export default function OnboardingPage() {
   const [state, formAction, isPending] = useActionState(setPseudonym, null);

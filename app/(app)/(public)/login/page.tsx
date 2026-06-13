@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { useActionState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { login } from "@/app/auth/actions";
+import { login } from "@/app/(app)/auth/actions";
 
 function LoginForm() {
   const [state, formAction, isPending] = useActionState(login, null);

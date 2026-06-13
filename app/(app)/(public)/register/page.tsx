@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useActionState } from "react";
-import { signUp } from "@/app/auth/actions";
+import { signUp } from "@/app/(app)/auth/actions";
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(signUp, null);
