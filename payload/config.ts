@@ -38,7 +38,7 @@ export default buildConfig({
         rejectUnauthorized: false
       }
     },
-    push: true,
+    push: false,
   }),
   plugins: [
     s3Storage({
