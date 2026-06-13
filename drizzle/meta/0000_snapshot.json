@@ -1,5 +1,5 @@
 {
-  "id": "6f4fb003-57cd-46ae-b9cf-4910b84d60ff",
+  "id": "a5b9238f-3a41-4356-8655-732c6197f634",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -899,15 +899,6 @@
         "PENDING",
         "ACCEPTED",
         "REJECTED"
-      ]
-    },
-    "public.enum_users_role": {
-      "name": "enum_users_role",
-      "schema": "public",
-      "values": [
-        "admin",
-        "moderator",
-        "user"
       ]
     },
     "public.membership_status": {
