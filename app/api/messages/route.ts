@@ -39,9 +39,9 @@ export async function GET(request: Request) {
         createdAt: m.createdAt.toISOString()
       }))
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET private messages error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -96,8 +96,8 @@ export async function POST(request: Request) {
         createdAt: message.createdAt.toISOString()
       }
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST private message error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

@@ -33,7 +33,7 @@ async function getAuthenticatedProfile() {
 }
 
 // 1. Create a Menfess post
-export async function createMenfessPost(prevState: any, formData: FormData) {
+export async function createMenfessPost(prevState: unknown, formData: FormData) {
   try {
     const profile = await getAuthenticatedProfile();
     const content = formData.get('content') as string;
@@ -68,8 +68,8 @@ export async function createMenfessPost(prevState: any, formData: FormData) {
 
     revalidatePath('/feed');
     return { success: true, error: null };
-  } catch (err: any) {
-    return { error: err.message || 'Gagal mengirim menfess.' };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Gagal mengirim menfess.' };
   }
 }
 
@@ -102,8 +102,8 @@ export async function togglePostReaction(postId: number, emoji: string) {
 
     revalidatePath('/feed');
     return { success: true };
-  } catch (err: any) {
-    return { error: err.message || 'Gagal mengubah reaksi.' };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Gagal mengubah reaksi.' };
   }
 }
 
@@ -124,8 +124,8 @@ export async function addPostComment(postId: number, content: string) {
 
     revalidatePath('/feed');
     return { success: true };
-  } catch (err: any) {
-    return { error: err.message || 'Gagal menambahkan komentar.' };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Gagal menambahkan komentar.' };
   }
 }
 
@@ -176,7 +176,7 @@ export async function submitPollVote(optionId: number) {
 
     revalidatePath('/feed');
     return { success: true };
-  } catch (err: any) {
-    return { error: err.message || 'Gagal mengirim suara.' };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Gagal mengirim suara.' };
   }
 }

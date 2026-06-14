@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { sendMessage, delegateModerator } from "./actions";
 import { createClient } from "@/lib/supabase/client";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 interface MessageItem {
   id: number;
@@ -77,12 +78,14 @@ export default function CommunityClient({
   const [isPending, startTransition] = useTransition();
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
-  // Sync initial messages from props when server revalidates
-  useEffect(() => {
+  // Sync initial messages from props when server revalidates during render
+  const [prevInitialMessages, setPrevInitialMessages] = useState<MessageItem[]>(initialMessages);
+  if (initialMessages !== prevInitialMessages) {
     setMessages(initialMessages);
-  }, [initialMessages]);
+    setPrevInitialMessages(initialMessages);
+  }
 
   // Subscribe to Supabase Realtime Broadcast Channel
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ComponentProps } from "react";
 import { db } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import FeedClient from "./FeedClient";
@@ -76,8 +76,8 @@ export default async function FeedPage() {
 
   return (
     <FeedClient 
-      initialPosts={posts as any} 
-      initialPoll={poll as any} 
+      initialPosts={posts as unknown as ComponentProps<typeof FeedClient>['initialPosts']} 
+      initialPoll={poll as unknown as ComponentProps<typeof FeedClient>['initialPoll']} 
       currentUserId={user.id}
       tagsList={tagsList}
     />

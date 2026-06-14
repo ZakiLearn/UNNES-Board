@@ -41,8 +41,8 @@ export async function getProfilesForSelect() {
     }).from(profileTable).orderBy(asc(profileTable.aliasName));
 
     return { success: true, data: profiles };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -92,8 +92,8 @@ export async function createCommunity(formData: { name: string; description: str
 
     revalidatePath('/communities');
     return { success: true, data: community };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -128,8 +128,8 @@ export async function joinCommunityRequest(communityId: number, alasan: string) 
 
     revalidatePath('/communities');
     return { success: true, data: member };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -163,7 +163,7 @@ export async function simulatedApproveMember(communityId: number) {
     revalidatePath('/communities');
     revalidatePath(`/communities/${communityId}`);
     return { success: true, data: updated };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }

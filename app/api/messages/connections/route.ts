@@ -42,7 +42,7 @@ export async function GET() {
     });
 
     // Format connections to easily access the target profile
-    const activeChats = acceptedConnections.map((conn: any) => {
+    const activeChats = acceptedConnections.map((conn) => {
       const counterpart = conn.senderId === user.id ? conn.receiver : conn.sender;
       return {
         connectionId: conn.id,
@@ -68,15 +68,15 @@ export async function GET() {
 
     return NextResponse.json({
       activeChats,
-      pendingRequests: pendingRequests.map((r: any) => ({
+      pendingRequests: pendingRequests.map((r) => ({
         connectionId: r.id,
         sender: r.sender,
         createdAt: r.createdAt,
       })),
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET connections error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -172,8 +172,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: "Bad Request" }, { status: 400 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("POST connections error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

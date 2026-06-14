@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import { Search, Send, UserPlus, Check, X, MessageSquare, AlertCircle } from "lucide-react";
 
 interface Profile {
@@ -55,8 +56,8 @@ export default function MessagesPage() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  const activeChannelRef = useRef<any>(null);
-  const globalChannelRef = useRef<any>(null);
+  const activeChannelRef = useRef<RealtimeChannel | null>(null);
+  const globalChannelRef = useRef<RealtimeChannel | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // 1. Fetch current user & connection data
@@ -88,6 +89,7 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, []);
 

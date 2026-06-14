@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
-export async function login(prevState: any, formData: FormData) {
+export async function login(prevState: unknown, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
@@ -29,7 +29,7 @@ export async function login(prevState: any, formData: FormData) {
   redirect('/feed');
 }
 
-export async function signUp(prevState: any, formData: FormData) {
+export async function signUp(prevState: unknown, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
@@ -76,7 +76,7 @@ export async function signOut() {
 import { db } from '@/lib/db';
 import { profile } from '@/lib/db/schema';
 
-export async function setPseudonym(prevState: any, formData: FormData) {
+export async function setPseudonym(prevState: unknown, formData: FormData) {
   const alias = formData.get('alias') as string;
 
   if (!alias || alias.trim() === '') {
@@ -115,8 +115,8 @@ export async function setPseudonym(prevState: any, formData: FormData) {
         aliasName: alias.trim(),
       },
     });
-  } catch (error: any) {
-    if (error.code === '23505') {
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
       return { error: 'Nama samaran ini sudah digunakan. Silakan cari nama samaran lain.' };
     }
     return { error: 'Gagal menyimpan nama samaran. Silakan coba lagi.' };

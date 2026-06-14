@@ -73,8 +73,8 @@ export async function sendMessage(communityId: number, roomName: string, content
 
     revalidatePath(`/communities/${communityId}`);
     return { success: true, data: msgWithProfile };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -141,7 +141,7 @@ export async function delegateModerator(communityId: number, targetProfileId: st
 
     revalidatePath(`/communities/${communityId}`);
     return { success: true, data: updated };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }

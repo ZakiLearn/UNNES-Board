@@ -13,7 +13,8 @@ import {
   User, 
   GraduationCap, 
   Users, 
-  LogOut 
+  LogOut,
+  Newspaper
 } from "lucide-react";
 
 export default function ProtectedLayout({
@@ -54,6 +55,7 @@ export default function ProtectedLayout({
     { name: "Komunitas", href: "/communities", icon: Users },
     { name: "Messages", href: "/messages", icon: MessageSquare },
     { name: "Marketplace", href: "/marketplace", icon: ShoppingCart },
+    { name: "Updates", href: "/updates", icon: Newspaper },
     { name: "Notifications", href: "/notifications", icon: Bell },
     { name: "Profile", href: "/profile", icon: User },
   ];
