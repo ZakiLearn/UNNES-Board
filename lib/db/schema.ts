@@ -118,6 +118,31 @@ export const directMessage = pgTable('direct_message', {
   index('dm_created_at_idx').on(t.createdAt),
 ])
 
+// Marketplace tables
+export const marketplaceItem = pgTable('marketplace_item', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  price: integer('price').notNull(),
+  condition: text('condition').notNull(),
+  category: text('category').notNull(),
+  description: text('description').notNull(),
+  imageUrl: text('image_url').notNull(),
+  location: text('location').notNull(),
+  sold: boolean('sold').default(false).notNull(),
+  sellerId: text('seller_id').notNull().references(() => profile.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const marketplaceTransaction = pgTable('marketplace_transaction', {
+  id: serial('id').primaryKey(),
+  itemId: integer('item_id').notNull().references(() => marketplaceItem.id, { onDelete: 'cascade' }),
+  buyerId: text('buyer_id').notNull().references(() => profile.id, { onDelete: 'cascade' }),
+  paymentMethod: text('payment_method').notNull(),
+  deliveryNote: text('delivery_note').notNull(),
+  totalPrice: integer('total_price').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 // Relations (to enable nested queries / drizzle relations)
 export const profileRelations = relations(profile, ({ many }) => ({
   posts: many(post),
@@ -130,6 +155,8 @@ export const profileRelations = relations(profile, ({ many }) => ({
   receivedConnections: many(chatConnection, { relationName: 'receivedConnections' }),
   sentMessages: many(directMessage, { relationName: 'sentMessages' }),
   receivedMessages: many(directMessage, { relationName: 'receivedMessages' }),
+  marketplaceItems: many(marketplaceItem),
+  marketplaceTransactions: many(marketplaceTransaction),
 }))
 
 export const tagRelations = relations(tag, ({ many }) => ({
@@ -191,3 +218,13 @@ export const directMessageRelations = relations(directMessage, ({ one }) => ({
   sender: one(profile, { relationName: 'sentMessages', fields: [directMessage.senderId], references: [profile.id] }),
   receiver: one(profile, { relationName: 'receivedMessages', fields: [directMessage.receiverId], references: [profile.id] }),
 }))
+
+export const marketplaceItemRelations = relations(marketplaceItem, ({ one }) => ({
+  seller: one(profile, { fields: [marketplaceItem.sellerId], references: [profile.id] }),
+}))
+
+export const marketplaceTransactionRelations = relations(marketplaceTransaction, ({ one }) => ({
+  item: one(marketplaceItem, { fields: [marketplaceTransaction.itemId], references: [marketplaceItem.id] }),
+  buyer: one(profile, { fields: [marketplaceTransaction.buyerId], references: [profile.id] }),
+}))
+

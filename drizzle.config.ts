@@ -21,5 +21,7 @@ export default defineConfig({
     'profile',
     'reaction',
     'tag',
+    'marketplace_item',
+    'marketplace_transaction',
   ],
 })
