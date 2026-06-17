@@ -13,25 +13,25 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://unnes-board.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://unnesboard.com"),
   title: {
-    default: "UNNES-Board - Forum & Marketplace Mahasiswa UNNES",
-    template: "%s | UNNES-Board",
+    default: "Unnesboard - Forum & Marketplace Mahasiswa UNNES",
+    template: "%s | Unnesboard",
   },
   description: "Platform terintegrasi mahasiswa UNNES untuk marketplace, informasi kos, event, dan forum diskusi.",
   keywords: ["UNNES", "Universitas Negeri Semarang", "Marketplace UNNES", "Info Kos UNNES", "Forum Mahasiswa"],
-  authors: [{ name: "UNNES-Board" }],
+  authors: [{ name: "Unnesboard" }],
   openGraph: {
-    title: "UNNES-Board - Forum & Marketplace Mahasiswa UNNES",
+    title: "Unnesboard - Forum & Marketplace Mahasiswa UNNES",
     description: "Platform terintegrasi mahasiswa UNNES untuk marketplace, informasi kos, event, dan forum diskusi.",
-    url: "https://unnes-board.com",
-    siteName: "UNNES-Board",
+    url: "https://unnesboard.com",
+    siteName: "Unnesboard",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "UNNES-Board Preview",
+        alt: "Unnesboard Preview",
       },
     ],
     locale: "id_ID",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "UNNES-Board - Forum & Marketplace Mahasiswa UNNES",
+    title: "Unnesboard - Forum & Marketplace Mahasiswa UNNES",
     description: "Platform terintegrasi mahasiswa UNNES untuk marketplace, informasi kos, event, dan forum diskusi.",
     images: ["/og-image.png"],
   },
