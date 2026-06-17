@@ -13,7 +13,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://unnesboard.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://unnes-board.vercel.app/"),
   title: {
     default: "Unnesboard - Forum & Marketplace Mahasiswa UNNES",
     template: "%s | Unnesboard",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: "Unnesboard",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://unnes-board.vercel.app/og-image.png",
         width: 1200,
         height: 630,
         alt: "Unnesboard Preview",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Unnesboard - Forum & Marketplace Mahasiswa UNNES",
     description: "Platform terintegrasi mahasiswa UNNES untuk marketplace, informasi kos, event, dan forum diskusi.",
-    images: ["/og-image.png"],
+    images: ["https://unnes-board.vercel.app/og-image.png"],
   },
 };
 
